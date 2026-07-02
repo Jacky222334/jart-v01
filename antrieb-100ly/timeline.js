@@ -67,9 +67,9 @@ export function createTimeline(art, {
     }
     .timeline.scrubbing .timeline-thumb { transition: none; }
     @media (max-width: 430px) {
-      .timeline { font-size: 9px; }
-      .timeline-track { height: 26px; }
-      .timeline-thumb { width: 16px; height: 16px; margin-left: -8px; margin-top: -8px; }
+      .timeline { font-size: 9px; padding-bottom: max(0.75rem, env(safe-area-inset-bottom)); }
+      .timeline-track { height: 30px; -webkit-tap-highlight-color: transparent; }
+      .timeline-thumb { width: 18px; height: 18px; margin-left: -9px; margin-top: -9px; }
     }
   `;
   document.head.appendChild(style);
@@ -174,18 +174,21 @@ export function createTimeline(art, {
     track.setAttribute('aria-valuenow', String(Math.round(art.time)));
   }
 
-  function onScrubStart() {
+  function onScrubStart(e) {
+    if (e) e.stopPropagation();
     dragging = true;
     wasPlaying = art.launched && !art.paused;
     art.paused = true;
     root.classList.add('scrubbing');
   }
 
-  function onScrub(clientX) {
+  function onScrub(clientX, e) {
+    if (e) e.stopPropagation();
     seek(posToTime(clientX));
   }
 
-  function onScrubEnd() {
+  function onScrubEnd(e) {
+    if (e) e.stopPropagation();
     if (!dragging) return;
     dragging = false;
     root.classList.remove('scrubbing');
@@ -196,29 +199,51 @@ export function createTimeline(art, {
     }
   }
 
+  function px(e) {
+    if (e.touches?.length) return e.touches[0].clientX;
+    if (e.changedTouches?.length) return e.changedTouches[0].clientX;
+    return e.clientX;
+  }
+
+  root.addEventListener('touchstart', (e) => {
+    e.stopPropagation();
+    onScrubStart(e);
+    onScrub(px(e), e);
+  }, { passive: false });
+  root.addEventListener('touchmove', (e) => {
+    if (!dragging) return;
+    e.preventDefault();
+    e.stopPropagation();
+    onScrub(px(e), e);
+  }, { passive: false });
+  root.addEventListener('touchend', (e) => {
+    e.stopPropagation();
+    onScrubEnd(e);
+  });
+  root.addEventListener('touchcancel', (e) => onScrubEnd(e));
+
   track.addEventListener('lostpointercapture', onScrubEnd);
   window.addEventListener('pointerup', onScrubEnd);
   window.addEventListener('pointercancel', onScrubEnd);
 
   track.addEventListener('pointerdown', (e) => {
     e.preventDefault();
-    track.setPointerCapture(e.pointerId);
-    onScrubStart();
-    onScrub(e.clientX);
+    e.stopPropagation();
+    if (track.setPointerCapture) track.setPointerCapture(e.pointerId);
+    onScrubStart(e);
+    onScrub(e.clientX, e);
   });
   track.addEventListener('pointermove', (e) => {
     if (!dragging) return;
-    onScrub(e.clientX);
+    e.stopPropagation();
+    onScrub(e.clientX, e);
   });
   track.addEventListener('pointerup', (e) => {
     if (!dragging) return;
-    track.releasePointerCapture(e.pointerId);
-    onScrubEnd();
+    if (track.releasePointerCapture) track.releasePointerCapture(e.pointerId);
+    onScrubEnd(e);
   });
-  track.addEventListener('pointercancel', () => {
-    if (!dragging) return;
-    onScrubEnd();
-  });
+  track.addEventListener('pointercancel', onScrubEnd);
 
   track.addEventListener('keydown', (e) => {
     if (!art.launched) return;
@@ -239,5 +264,8 @@ export function createTimeline(art, {
   requestAnimationFrame(sync);
 
   setRange(range);
-  return { seek, update, setRange, el: root };
+  return {
+    seek, update, setRange, el: root,
+    isScrubbing: () => dragging,
+  };
 }

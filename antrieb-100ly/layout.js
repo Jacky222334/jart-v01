@@ -45,7 +45,8 @@ export function computeLayout(w, h) {
 
   const safetyW = phone ? Math.min(iw * 0.52, 196) : Math.min(200, iw * 0.26);
   const safetyH = 12 * 13 + 32;
-  const progressBottom = safe.bottom + (phone ? 20 : 14);
+  const timelinePad = phone ? 56 : 0;
+  const progressBottom = safe.bottom + (phone ? 20 : 14) + timelinePad;
   const safetyY = h - progressBottom - safetyH - (phone ? 6 : 28);
 
   return {

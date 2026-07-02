@@ -50,6 +50,10 @@ export class Antrieb100LY {
     this.canvas.height = Math.floor(this.h * dpr);
     this.canvas.style.width = `${this.w}px`;
     this.canvas.style.height = `${this.h}px`;
+    if (vv) {
+      this.canvas.style.top = `${vv.offsetTop}px`;
+      this.canvas.style.left = `${vv.offsetLeft}px`;
+    }
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     this.layout = computeLayout(this.w, this.h);
     if (!this.posturBurst) this.posturBurst = new PosturBurst(this.w, this.h);

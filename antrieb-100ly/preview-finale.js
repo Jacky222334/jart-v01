@@ -1,6 +1,7 @@
 import { Antrieb100LY } from './sketch.js';
 import { CYCLE, PHASES } from './systems.js';
 import { createTimeline } from './timeline.js';
+import { bindSafariPlayback, bindCanvasControls } from './mobile.js';
 
 const SCENES = [
   { key: 'reunion', label: '1 · Reunion · Bethy & Jany nähern sich' },
@@ -21,6 +22,12 @@ const titleEl = document.getElementById('scene-title');
 const art = new Antrieb100LY(canvas);
 const timeline = createTimeline(art, { showAfterLaunch: false });
 timeline.el.classList.add('visible');
+
+bindSafariPlayback(art);
+bindCanvasControls(canvas, art, {
+  timelineEl: timeline.el,
+  isScrubbing: () => timeline.isScrubbing(),
+});
 
 let sceneIdx = 2;
 
@@ -60,8 +67,4 @@ window.addEventListener('keydown', (e) => {
     art.togglePause();
   }
   if (e.key === 's' || e.key === 'S') art.saveFrame();
-});
-
-canvas.addEventListener('click', () => {
-  art.togglePause();
 });
