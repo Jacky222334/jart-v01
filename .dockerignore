@@ -1,0 +1,13 @@
+node_modules
+.git
+.cursor
+.DS_Store
+*.log
+.env
+.env.*
+uncertain8132/p5.min.js
+uncertain8132/CCapture.all.min.js
+liith5113/build/three.module.js
+liith5113/build/CCapture.all.min.js
+rainbow11127/bundle.js
+agent-transcripts

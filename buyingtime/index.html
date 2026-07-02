@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buying Time — homage</title>
+  <meta name="theme-color" content="#8f84a8">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%; height: 100%; overflow: hidden;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+
+    canvas {
+      display: block;
+      width: 100vw; height: 100vh;
+    }
+
+    #ui {
+      position: fixed; inset: 0;
+      pointer-events: none;
+      color: #c8d88a;
+      mix-blend-mode: difference;
+    }
+
+    #ui a, #ui button, #ui .time {
+      pointer-events: auto;
+      background: none; border: none;
+      color: inherit;
+      font: inherit;
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 0.2em;
+    }
+
+    .top {
+      position: absolute; top: 1.1rem; left: 1.2rem; right: 1.2rem;
+      display: flex; justify-content: space-between;
+      font-size: 0.95rem; font-weight: 600;
+    }
+
+    .bottom {
+      position: absolute; bottom: 1.1rem; left: 0; right: 0;
+      display: flex; align-items: center; justify-content: center;
+      gap: 1.4rem;
+      font-size: 0.95rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .step {
+      font-size: 1.1rem;
+      text-decoration: none !important;
+      padding: 0.2rem 0.4rem;
+    }
+  </style>
+</head>
+<body>
+  <canvas aria-label="Zeitbasierte Form"></canvas>
+  <div id="ui">
+    <div class="top">
+      <span>Buying Time <small style="font-weight:400;opacity:.7">· homage · Chomko</small></span>
+      <button type="button" id="liveBtn" title="Live-Zeit">Live</button>
+    </div>
+    <div class="bottom">
+      <button type="button" class="step" id="prev" aria-label="Vorherige Minute">←</button>
+      <button type="button" class="time" id="timeLabel" title="Zur Live-Zeit">00:00</button>
+      <button type="button" class="step" id="next" aria-label="Nächste Minute">→</button>
+    </div>
+  </div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

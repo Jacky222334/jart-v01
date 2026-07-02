@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>eukär — homage</title>
+  <meta name="description" content="Generative Physarum-Kunst inspiriert von eukär von p1xelfool">
+  <meta name="theme-color" content="#000000">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+      color: #fff;
+      font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+    }
+
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+      cursor: crosshair;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+
+    #overlay {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    #title {
+      position: absolute;
+      top: 1.4rem;
+      left: 1.6rem;
+      letter-spacing: 0.28em;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      opacity: 0;
+      animation: fadeIn 2.4s ease 0.6s forwards;
+    }
+
+    #title span {
+      opacity: 0.42;
+      font-weight: 400;
+    }
+
+    #hint {
+      position: absolute;
+      bottom: 1.4rem;
+      right: 1.6rem;
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      opacity: 0;
+      animation: fadeIn 2s ease 2.2s forwards;
+      color: rgba(255, 255, 255, 0.38);
+    }
+
+    #seed {
+      position: absolute;
+      bottom: 1.4rem;
+      left: 1.6rem;
+      font-size: 0.62rem;
+      letter-spacing: 0.08em;
+      opacity: 0;
+      animation: fadeIn 2s ease 2.2s forwards;
+      color: rgba(255, 255, 255, 0.28);
+    }
+
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+
+    @media (max-width: 640px) {
+      #title { font-size: 0.62rem; left: 1rem; top: 1rem; }
+      #hint, #seed { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <canvas tabindex="0" aria-label="Generative artwork"></canvas>
+  <div id="overlay">
+    <div id="title">eukär <span>· homage · p1xelfool</span></div>
+    <div id="seed"></div>
+    <div id="hint">klick · neu · s · speichern</div>
+  </div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

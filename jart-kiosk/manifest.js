@@ -1,0 +1,43 @@
+/** Alle jart_v01-Animationen — je 2 Minuten, Basis-URL relativ zum HTTP-Root */
+export const SLIDE_MS = 120_000;
+
+export const PIECES = [
+  { title: 'Antrieb 100LY · Alle Systeme ◉', path: '/antrieb-100ly/index.html' },
+  { title: 'PXL DEX Ultra · Asendorf ◉', path: '/pxl-dex-ultra/index.html' },
+  { title: 'Spectron #259 · Neon Pixel ◉', path: '/spectron108-neon/index.html' },
+  { title: 'Raketen-Wahn · Antimaterie ◉', path: '/raketen-wahn/index.html' },
+  { title: 'Blocks - ArtTab #8133', path: '/blocks8133/index.html' },
+  { title: 'Kosmos-Reise · Rakete ◉', path: '/kosmos-reise/index.html' },
+  { title: 'GO · Körper · Grenzen ◉', path: '/go-grenzen/index.html' },
+  { title: 'GO · Polarlichter ◉', path: '/polarlichter/index.html' },
+  { title: 'Nordpol · Eis-POV ◉', path: '/nordpol-eis/index.html' },
+  { title: 'Matterhorn · Pixel ◉', path: '/matterhorn/index.html' },
+  { title: 'LEGO · Binär · Klischee ◉', path: '/lego-binary/index.html' },
+  { title: 'Orbit Couture · Catwalk ◉', path: '/raumanzug-catwalk/index.html' },
+  { title: 'Hunger · Musk · Geld ◉', path: '/afrika-hunger-geld/index.html' },
+  { title: 'Hail Mary · Astrophage ◉', path: '/hail-mary/index.html' },
+  { title: 'Artemis · NASA ◉', path: '/artemis/index.html' },
+  { title: 'Afrika · Sterben ◉', path: '/afrika-tod/index.html' },
+  { title: 'Organic Neo · Galaxie ◉', path: '/organic-neo/index.html' },
+  { title: 'Veggåkle #34', path: '/veggakle5108/index.html' },
+  { title: 'Alternate 95v1 · Kim Asendorf', path: '/alternate10074/index.html' },
+  {
+    title: 'LIITH #17 · Datura',
+    path: '/liith5113/index.html?fxhash=onnyEhfHFJ9FF71Wr8NPCYd9WCecc4GkKGGi1WfpbH1XZF6fxi8&fxminter=tz1WwHHT1uEZZZUZmApzB2SMrsNKvjTZ69hz&fxiteration=17&fxcontext=standalone&fxchain=TEZOS&fxparamsUpdate=41c12b5241800000#0x0e01403f000000000000403c000000000000405300000000000009',
+  },
+  {
+    title: 'uncertain index #327 · p1xelfool',
+    path: '/uncertain8132/index.html?seed=8a0cc7633a6eaf41a83e5ff9177dae28062c2c64b95bfe9b4dd0a95f5a1e1efd&seedGlobal=3a175460223789e0b148c0aca2235240',
+  },
+  { title: 'Night Impression IV · MCHX', path: '/night5109/index.html' },
+  { title: 'Invader 19 · nbswwit', path: '/invader8135/index.html' },
+  { title: 'Rainbow L16-7F · Kim Asendorf', path: '/rainbow11127/index.html' },
+  { title: 'Buying Time · Chomko', path: '/buyingtime/index.html' },
+  { title: 'Prismflux', path: '/prismflux/index.html' },
+  { title: 'eukär · p1xelfool', path: '/eukar/index.html?seed=8606' },
+  { title: 'Live Weltraum', path: '/space-live/index.html' },
+  { title: 'Retro Pixel · IPFS', path: '/custom5109/index.html' },
+  { title: 'Penrose · IPFS', path: '/custom-qmdNwJG/index.html' },
+  { title: 'RGB-Würfel · IPFS', path: '/custom-qmYinCe/index.html' },
+  { title: 'Raster #1500 · bits.raster.art', path: '/raster1500/index.html' },
+];

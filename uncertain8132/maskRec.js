@@ -1,0 +1,1 @@
+class maskRect{constructor(s,t,i,c){this.size=createVector(i,c),this.loc=createVector(s,t)}display(){pgMask.rectMode(CENTER),pgMask.rect(this.loc.x,this.loc.y,this.size.x,this.size.y)}}

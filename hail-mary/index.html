@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hail Mary · Astrophage</title>
+  <meta name="theme-color" content="#000008">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 100%; height: 100%; overflow: hidden;
+      background: #000008;
+      font-family: "SF Mono", Consolas, "Courier New", monospace;
+    }
+    canvas {
+      display: block;
+      width: 100vw; height: 100vh;
+      cursor: crosshair;
+    }
+    #hint {
+      position: fixed;
+      right: 1rem; bottom: 1rem;
+      color: #333;
+      font-size: 11px;
+      pointer-events: none;
+      letter-spacing: 0.06em;
+    }
+  </style>
+</head>
+<body>
+  <canvas aria-label="Project Hail Mary Astrophage Simulation"></canvas>
+  <div id="hint">klick · pause · → · akt · s · speichern</div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

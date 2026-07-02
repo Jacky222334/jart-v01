@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1, maximum-scale=2">
+  <title>PXL DEX Ultra · Kim Asendorf · ArtTab #4498</title>
+  <meta name="theme-color" content="#00000c">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 100%; height: 100%; overflow: hidden;
+      background: #00000c;
+      font-family: "SF Mono", Consolas, monospace;
+    }
+    #screen { width: 100vw; height: 100vh; cursor: crosshair; }
+    #overlay {
+      position: fixed; inset: 0; pointer-events: none;
+      display: flex; flex-direction: column;
+      justify-content: space-between; padding: 1rem;
+    }
+    #title {
+      color: rgba(0, 255, 255, 0.45);
+      font-size: 11px; letter-spacing: 0.12em;
+      text-shadow: 0 0 12px rgba(255, 0, 234, 0.4);
+    }
+    #title span { color: rgba(255, 0, 234, 0.35); }
+    #hint {
+      align-self: flex-end;
+      color: #223; font-size: 10px;
+    }
+    #pxl {
+      position: fixed; left: 1rem; bottom: 1rem;
+      color: rgba(255, 238, 0, 0.3);
+      font-size: 10px; pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="screen"></div>
+  <div id="overlay">
+    <div id="title">PXL DEX ULTRA <span>· #4498 · NEON DECK</span></div>
+    <div id="pxl">PXL ◉ DENSITY ◉ ZOOM ◉ 24 SLOTS</div>
+    <div id="hint">klick · pause · s · speichern · r · neu</div>
+  </div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Custom Art — homage</title>
+  <meta name="theme-color" content="#000000">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 100%; height: 100%; overflow: hidden;
+      background: #000;
+    }
+    video {
+      display: block;
+      width: 100vw; height: 100vh;
+      object-fit: contain;
+      background: #000;
+    }
+    #hint {
+      position: fixed; bottom: 1.2rem; right: 1.4rem;
+      font-family: "SF Mono", Consolas, monospace;
+      font-size: 0.58rem; letter-spacing: 0.1em;
+      color: rgba(255, 255, 255, 0.28);
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <video id="art" src="artifact.mp4" autoplay loop muted playsinline></video>
+  <div id="hint">klick · pause</div>
+  <script>
+    const art = document.getElementById('art');
+    art.addEventListener('click', () => (art.paused ? art.play() : art.pause()));
+    window.addEventListener('keydown', (e) => {
+      if (e.key === ' ') { e.preventDefault(); art.paused ? art.play() : art.pause(); }
+    });
+  </script>
+</body>
+</html>

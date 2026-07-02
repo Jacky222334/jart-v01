@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live — Weltraum</title>
+  <meta name="theme-color" content="#000005">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 100%; height: 100%; overflow: hidden;
+      background: #000005;
+      font-family: "SF Mono", "Consolas", monospace;
+      color: rgba(255, 255, 255, 0.85);
+    }
+    #stage {
+      position: fixed; inset: 0;
+      display: grid; place-items: center;
+      background: radial-gradient(ellipse at 50% 40%, #0a1020 0%, #000005 70%);
+    }
+    .layer {
+      position: absolute; inset: 0;
+      opacity: 0;
+      transition: opacity 2.4s ease;
+      display: grid; place-items: center;
+    }
+    .layer.active { opacity: 1; }
+    .layer img {
+      width: 100vw; height: 100vh;
+      object-fit: cover;
+      filter: contrast(1.04) saturate(1.08);
+    }
+    #hud {
+      position: fixed; inset: 0; pointer-events: none; z-index: 5;
+      background: linear-gradient(to top, rgba(0,0,8,0.72) 0%, transparent 28%),
+                  linear-gradient(to bottom, rgba(0,0,8,0.45) 0%, transparent 18%);
+    }
+    #label {
+      position: absolute; left: 1.4rem; bottom: 1.3rem;
+      max-width: min(90vw, 720px);
+    }
+    #title {
+      font-size: 0.78rem; letter-spacing: 0.18em; text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.92);
+      margin-bottom: 0.35rem;
+    }
+    #meta {
+      font-size: 0.58rem; letter-spacing: 0.08em;
+      color: rgba(180, 210, 255, 0.62);
+      line-height: 1.5;
+    }
+    #badge {
+      position: absolute; top: 1.2rem; left: 1.4rem;
+      font-size: 0.55rem; letter-spacing: 0.22em; text-transform: uppercase;
+      color: rgba(255, 90, 90, 0.95);
+      display: flex; align-items: center; gap: 0.45rem;
+    }
+    #badge::before {
+      content: ""; width: 0.45rem; height: 0.45rem; border-radius: 50%;
+      background: #ff4444; box-shadow: 0 0 8px #ff4444;
+      animation: pulse 1.6s ease infinite;
+    }
+    #progress {
+      position: absolute; bottom: 0; left: 0; height: 2px;
+      background: linear-gradient(90deg, #4af, #8cf, #4af);
+      width: 0%; transition: width 0.2s linear;
+    }
+    #counter {
+      position: absolute; top: 1.2rem; right: 1.4rem;
+      font-size: 0.55rem; letter-spacing: 0.12em;
+      color: rgba(255, 255, 255, 0.35);
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.45; transform: scale(0.85); }
+    }
+  </style>
+</head>
+<body>
+  <div id="stage"></div>
+  <div id="hud">
+    <div id="badge">Live · Weltraum</div>
+    <div id="counter"></div>
+    <div id="label">
+      <div id="title"></div>
+      <div id="meta"></div>
+    </div>
+    <div id="progress"></div>
+  </div>
+  <script>
+    const SLIDE_MS = 55000;
+    const REFRESH_MS = 120000;
+
+    const FEEDS = [
+      {
+        title: 'Erde · GOES-19',
+        meta: 'NOAA · Geostationär · Westliche Hemisphäre · alle 10 Min.',
+        url: () => `https://cdn.star.nesdis.noaa.gov/GOES19/ABI/FD/GEOCOLOR/latest.jpg?t=${Date.now()}`
+      },
+      {
+        title: 'Erde · GOES-18',
+        meta: 'NOAA · Pazifik & Ostasien · Full-Disk · GeoColor',
+        url: () => `https://cdn.star.nesdis.noaa.gov/GOES18/ABI/FD/GEOCOLOR/latest.jpg?t=${Date.now()}`
+      },
+      {
+        title: 'Erde · DSCOVR / EPIC',
+        meta: 'NASA · 1,5 Mio. km entfernt · L1 · blauer Planet',
+        url: async () => {
+          const res = await fetch('https://epic.gsfc.nasa.gov/api/natural');
+          const data = await res.json();
+          const item = data[data.length - 1];
+          const id = item.image;
+          const d = id.split('_').pop().slice(0, 8);
+          const y = d.slice(0, 4), m = d.slice(4, 6), day = d.slice(6, 8);
+          return `https://epic.gsfc.nasa.gov/archive/natural/${y}/${m}/${day}/png/${id}.png?t=${Date.now()}`;
+        }
+      },
+      {
+        title: 'Sonne · SDO · Ultraviolett 193 Å',
+        meta: 'NASA Solar Dynamics Observatory · Korona · ~1,5 Mio. °C',
+        url: () => `https://sdo.gsfc.nasa.gov/assets/img/latest/latest_1024_0193.jpg?t=${Date.now()}`
+      },
+      {
+        title: 'Sonne · SDO · Ultraviolett 304 Å',
+        meta: 'NASA SDO · Chromosphäre · prominente Strukturen',
+        url: () => `https://sdo.gsfc.nasa.gov/assets/img/latest/latest_1024_0304.jpg?t=${Date.now()}`
+      },
+      {
+        title: 'Sonne · SDO · Ultraviolett 171 Å',
+        meta: 'NASA SDO · Koronalöcher & aktive Regionen',
+        url: () => `https://sdo.gsfc.nasa.gov/assets/img/latest/latest_1024_0171.jpg?t=${Date.now()}`
+      },
+      {
+        title: 'Sonne · SDO · sichtbares Licht',
+        meta: 'NASA SDO · HMI · Photosphäre · Sonnenflecken',
+        url: () => `https://sdo.gsfc.nasa.gov/assets/img/latest/latest_1024_HMIIC.jpg?t=${Date.now()}`
+      },
+      {
+        title: 'Sonne · LASCO C3',
+        meta: 'ESA/NASA SOHO · Korona bis 30 Sonnenradien · Sterne im Hintergrund',
+        url: () => `https://services.swpc.noaa.gov/images/animations/lasco-c3/latest.jpg?t=${Date.now()}`
+      },
+      {
+        title: 'Sonne · LASCO C2',
+        meta: 'ESA/NASA SOHO · innere Korona · Protuberanzen',
+        url: () => `https://services.swpc.noaa.gov/images/animations/lasco-c2/latest.jpg?t=${Date.now()}`
+      },
+      {
+        title: 'Erde · GOES-19 · Nordamerika',
+        meta: 'NOAA · CONUS · Wolken & Tageslicht · hohe Auflösung',
+        url: () => `https://cdn.star.nesdis.noaa.gov/GOES19/ABI/CONUS/GEOCOLOR/latest.jpg?t=${Date.now()}`
+      }
+    ];
+
+    const stage = document.getElementById('stage');
+    const titleEl = document.getElementById('title');
+    const metaEl = document.getElementById('meta');
+    const counterEl = document.getElementById('counter');
+    const progressEl = document.getElementById('progress');
+
+    const layers = FEEDS.map((_, i) => {
+      const div = document.createElement('div');
+      div.className = 'layer' + (i === 0 ? ' active' : '');
+      const img = document.createElement('img');
+      img.alt = '';
+      div.appendChild(img);
+      stage.appendChild(div);
+      return { div, img, loaded: false };
+    });
+
+    let index = 0;
+    let slideStart = Date.now();
+    let progressTimer = null;
+
+    async function resolveUrl(feed) {
+      const u = feed.url();
+      return (u instanceof Promise) ? u : u;
+    }
+
+    async function loadSlide(i) {
+      const feed = FEEDS[i];
+      const layer = layers[i];
+      try {
+        const src = await resolveUrl(feed);
+        await new Promise((resolve, reject) => {
+          const img = layer.img;
+          img.onload = () => resolve();
+          img.onerror = reject;
+          img.src = src;
+        });
+        layer.loaded = true;
+      } catch (e) {
+        layer.loaded = false;
+      }
+    }
+
+    function showSlide(i) {
+      layers.forEach((l, j) => l.div.classList.toggle('active', j === i));
+      const feed = FEEDS[i];
+      titleEl.textContent = feed.title;
+      metaEl.textContent = feed.meta;
+      counterEl.textContent = `${i + 1} / ${FEEDS.length}`;
+      slideStart = Date.now();
+      progressEl.style.width = '0%';
+    }
+
+    function preloadNext() {
+      const next = (index + 1) % FEEDS.length;
+      loadSlide(next);
+    }
+
+    async function advance() {
+      index = (index + 1) % FEEDS.length;
+      if (!layers[index].loaded) await loadSlide(index);
+      showSlide(index);
+      preloadNext();
+    }
+
+    function tickProgress() {
+      const elapsed = Date.now() - slideStart;
+      const pct = Math.min(100, (elapsed / SLIDE_MS) * 100);
+      progressEl.style.width = pct + '%';
+    }
+
+    async function refreshCurrent() {
+      await loadSlide(index);
+      showSlide(index);
+    }
+
+    async function init() {
+      await loadSlide(0);
+      showSlide(0);
+      preloadNext();
+      progressTimer = setInterval(tickProgress, 200);
+      setInterval(advance, SLIDE_MS);
+      setInterval(refreshCurrent, REFRESH_MS);
+    }
+
+    init();
+  </script>
+</body>
+</html>

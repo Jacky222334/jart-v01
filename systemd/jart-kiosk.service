@@ -1,0 +1,19 @@
+[Unit]
+Description=jart Animation Kiosk (HDMI-2 · alle Werke)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+Environment=DISPLAY=:0
+Environment=XAUTHORITY=/home/jbs3123/.Xauthority
+Environment=HOME=/home/jbs3123
+ExecStartPre=/bin/sleep 20
+ExecStartPre=/bin/bash -c 'for i in $(seq 1 45); do xdpyinfo -display :0 >/dev/null 2>&1 && exit 0; sleep 2; done; exit 0'
+ExecStart=/home/jbs3123/start-jart-kiosk.sh start
+ExecStop=/home/jbs3123/start-jart-kiosk.sh stop
+TimeoutStartSec=240
+
+[Install]
+WantedBy=default.target

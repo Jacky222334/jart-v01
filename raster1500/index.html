@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Raster #1500 — homage</title>
+  <meta name="theme-color" content="#000000">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 100%; height: 100%; overflow: hidden;
+      background: #000;
+    }
+    img {
+      display: block;
+      width: 100vw; height: 100vh;
+      object-fit: contain;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+    #hint {
+      position: fixed; bottom: 1.2rem; right: 1.4rem;
+      font-family: "SF Mono", Consolas, monospace;
+      font-size: 0.58rem; letter-spacing: 0.1em;
+      color: rgba(255, 255, 255, 0.28);
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <img id="art" src="1500-anim.avif" alt="Raster #1500">
+  <div id="hint">bits.raster.art · #1500</div>
+</body>
+</html>

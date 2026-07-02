@@ -1,0 +1,14 @@
+{
+  "name": "jart-v01",
+  "version": "1.0.0",
+  "description": "Neon-Kiosk-Animationen · Antrieb 100LY · Hail Mary · jart",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "private": true
+}
