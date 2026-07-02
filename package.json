@@ -7,8 +7,9 @@
     "node": ">=20"
   },
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js"
+    "start": "node antrieb-100ly/server.js",
+    "dev": "node antrieb-100ly/server.js",
+    "kiosk": "node server.js"
   },
   "private": true
 }

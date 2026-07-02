@@ -1,0 +1,12 @@
+{
+  "name": "antrieb-100ly",
+  "version": "1.0.0",
+  "description": "Antrieb 100LY · Neon-Raketenmission",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "private": true
+}
