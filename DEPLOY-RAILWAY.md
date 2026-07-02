@@ -1,23 +1,33 @@
 # Deploy · GitHub → Railway
 
-## 1. GitHub Repository
+**Live:** https://jart-v01-production.up.railway.app  
+**Repo:** https://github.com/Jacky222334/jart-v01
+
+## 1. GitHub Push
 
 ```bash
 cd jart_v01
-git init
-git add .
-git commit -m "jart_v01 · Kiosk-Animationen · Railway-ready"
-git branch -M main
-git remote add origin https://github.com/DEIN-USER/jart-v01.git
-git push -u origin main
+node scripts/push-github.mjs   # ohne Xcode-git
+# oder klassisch:
+git add . && git commit -m "update" && git push
 ```
 
-## 2. Railway
+## 2. Railway (Auto-Deploy)
 
-1. [railway.app](https://railway.app) → **New Project** → **Deploy from GitHub repo**
-2. Repo `jart-v01` auswählen
-3. Railway erkennt `package.json` + `server.js` automatisch
-4. **Settings → Networking → Generate Domain** (öffentliche URL)
+**Option A — GitHub verbinden (empfohlen):**
+1. [railway.app](https://railway.app) → Projekt `jart-v01` → Service → **Settings**
+2. **Connect Repo** → `Jacky222334/jart-v01` → Branch `main`
+3. Jeder Push auf `main` deployt automatisch
+
+**Option B — GitHub Actions:**
+1. Railway → Account → **Tokens** → Token erstellen
+2. GitHub → Repo → Settings → Secrets → `RAILWAY_TOKEN`
+3. Workflow `.github/workflows/railway.yml` deployt bei jedem Push
+
+**Option C — Manuell:**
+```bash
+railway up --detach
+```
 
 Start: `node server.js` · Port aus `$PORT` (Railway setzt das automatisch).
 
