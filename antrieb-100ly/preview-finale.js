@@ -1,5 +1,6 @@
 import { Antrieb100LY } from './sketch.js';
 import { CYCLE, PHASES } from './systems.js';
+import { createTimeline } from './timeline.js';
 
 const SCENES = [
   { key: 'reunion', label: '1 · Reunion · Bethy & Jany nähern sich' },
@@ -18,6 +19,12 @@ function timeForScene(scene) {
 const canvas = document.querySelector('canvas');
 const titleEl = document.getElementById('scene-title');
 const art = new Antrieb100LY(canvas);
+const timeline = createTimeline(art, {
+  range: [0.902, 1],
+  showAfterLaunch: false,
+});
+timeline.el.classList.add('visible');
+
 let sceneIdx = 2;
 
 function showScene(i) {
@@ -29,6 +36,7 @@ function showScene(i) {
   art.t0 = performance.now() - art.time * 1000;
   art.canvas.style.cursor = 'crosshair';
   titleEl.textContent = scene.label;
+  timeline.update();
 }
 
 showScene(sceneIdx);
@@ -40,12 +48,12 @@ window.addEventListener('keydown', (e) => {
     showScene(Number(e.key) - 1);
     return;
   }
-  if (e.key === 'ArrowLeft') {
+  if (e.key === 'ArrowLeft' && !e.target.closest('.timeline-track')) {
     e.preventDefault();
     showScene(sceneIdx - 1);
     return;
   }
-  if (e.key === 'ArrowRight') {
+  if (e.key === 'ArrowRight' && !e.target.closest('.timeline-track')) {
     e.preventDefault();
     showScene(sceneIdx + 1);
     return;

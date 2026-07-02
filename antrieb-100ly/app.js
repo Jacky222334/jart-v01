@@ -1,7 +1,9 @@
 import { Antrieb100LY } from './sketch.js';
+import { createTimeline } from './timeline.js';
 
 const canvas = document.querySelector('canvas');
 const art = new Antrieb100LY(canvas);
+const timeline = createTimeline(art);
 let touchPause = false;
 
 canvas.style.cursor = 'pointer';

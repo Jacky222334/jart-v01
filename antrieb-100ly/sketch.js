@@ -714,6 +714,17 @@ export class Antrieb100LY {
     if (!this.paused) this.t0 = performance.now() - this.time * 1000;
   }
 
+  seek(seconds) {
+    if (!this.launched) {
+      this.launched = true;
+      this.canvas.style.cursor = 'crosshair';
+      document.getElementById('hint')?.classList.add('visible');
+    }
+    this.time = ((seconds % CYCLE) + CYCLE) % CYCLE;
+    this.t0 = performance.now() - this.time * 1000;
+    this.draw();
+  }
+
   saveFrame() {
     this.canvas.toBlob((blob) => {
       if (!blob) return;
