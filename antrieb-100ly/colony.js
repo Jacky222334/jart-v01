@@ -5,6 +5,7 @@ import {
   drawParadiseSky, drawWaterfalls, drawSettlement,
   drawRichGarden, drawParadiseGround,
 } from './paradise.js';
+import { drawRockCreatureFinale } from './rockCreature.js';
 
 const TAU = Math.PI * 2;
 
@@ -244,6 +245,7 @@ export function drawColonyPhase(ctx, local, t, w, h, layout = null) {
 
   if (A.key === 'dance') {
     drawDancingCats(ctx, cx, groundY, slowT(t), A.t, layout);
+    drawRockCreatureFinale(ctx, A.t, slowT(t), w, h, layout, 'left');
   }
 }
 

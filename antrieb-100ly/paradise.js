@@ -1,6 +1,7 @@
 /** Paradise · Siedlung · Früchte · Wasserfälle · Happy End */
 import { NEON, hash, ease, lerp } from './systems.js';
 import { drawCat, drawFusedCat } from './finale.js';
+import { drawRockCreatureFinale } from './rockCreature.js';
 
 const TAU = Math.PI * 2;
 const FRUIT_COLS = [NEON.orange, NEON.magenta, NEON.nuclear, NEON.yellow, '#ff4466', '#88ff44'];
@@ -188,6 +189,8 @@ export function drawParadiseScene(ctx, local, t, w, h, layout, { fused = false, 
   drawWaterfalls(ctx, w, groundY, st, rich);
   drawSettlement(ctx, cx, groundY, rich);
   drawRichGarden(ctx, cx, groundY, w, st, rich, mob);
+
+  drawRockCreatureFinale(ctx, local, st, w, h, layout, 'right');
 
   const bethyX = cx - (mob ? 50 : 75) + Math.sin(st * 1.4) * 8;
   const janyX = cx + (mob ? 50 : 75) + Math.cos(st * 1.5) * 8;

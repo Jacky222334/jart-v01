@@ -1,5 +1,6 @@
 /** Finale · Bethy + Jany · Fusion · Posturknall */
 import { NEON, hash, ease, lerp } from './systems.js';
+import { drawRockCreatureFinale } from './rockCreature.js';
 
 const TAU = Math.PI * 2;
 
@@ -277,6 +278,7 @@ export function drawFusionPhase(ctx, local, t, w, h, layout = null) {
   } else {
     drawFusedCat(ctx, cx, cy, lerp(1, 1.3, (merge - 0.5) * 2) * storyScale(layout), t, (merge - 0.5) * 2);
   }
+  drawRockCreatureFinale(ctx, local, t, w, h, layout, 'right');
 }
 
 export function drawIntroPresentation(ctx, local, t, w, h, layout = null) {
