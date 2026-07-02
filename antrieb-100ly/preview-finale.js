@@ -19,10 +19,7 @@ function timeForScene(scene) {
 const canvas = document.querySelector('canvas');
 const titleEl = document.getElementById('scene-title');
 const art = new Antrieb100LY(canvas);
-const timeline = createTimeline(art, {
-  range: [0.902, 1],
-  showAfterLaunch: false,
-});
+const timeline = createTimeline(art, { showAfterLaunch: false });
 timeline.el.classList.add('visible');
 
 let sceneIdx = 2;
@@ -66,5 +63,5 @@ window.addEventListener('keydown', (e) => {
 });
 
 canvas.addEventListener('click', () => {
-  if (!art.paused) art.togglePause();
+  art.togglePause();
 });

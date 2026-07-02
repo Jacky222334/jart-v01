@@ -190,7 +190,7 @@ export function drawParadiseScene(ctx, local, t, w, h, layout, { fused = false, 
   drawSettlement(ctx, cx, groundY, rich);
   drawRichGarden(ctx, cx, groundY, w, st, rich, mob);
 
-  drawRockCreatureFinale(ctx, local, st, w, h, layout, 'right');
+  drawRockCreatureFinale(ctx, local, t, w, h, layout, 'right');
 
   const bethyX = cx - (mob ? 50 : 75) + Math.sin(st * 1.4) * 8;
   const janyX = cx + (mob ? 50 : 75) + Math.cos(st * 1.5) * 8;

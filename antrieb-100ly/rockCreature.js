@@ -1,5 +1,5 @@
 /** Fels-Wesen · Korg-artig · bewegend · Daumen runter */
-import { NEON, hash, ease, lerp } from './systems.js';
+import { NEON, hash, ease } from './systems.js';
 
 const TAU = Math.PI * 2;
 const ROCK = ['#9a7b4f', '#7a5c38', '#b8956a', '#5c4528', '#c4a574'];
@@ -138,23 +138,22 @@ export function drawRockCreature(ctx, x, y, sc, t, {
   ctx.globalAlpha = 1;
 }
 
-/** Für Finale-Szenen · seitlich einlaufend */
+/** Für Finale-Szenen · seitlich einlaufend · läuft frei weiter */
 export function drawRockCreatureFinale(ctx, local, t, w, h, layout, side = 'right') {
   const mob = layout?.phone;
-  const in_ = ease(Math.max(0, Math.min(1, (local - 0.15) / 0.3)));
-  if (in_ <= 0) return;
+  const fade = ease(Math.max(0, Math.min(1, (local - 0.1) / 0.2)));
+  if (fade <= 0) return;
 
   const groundY = h * (mob ? 0.7 : 0.66);
-  const sc = (mob ? 0.55 : 0.72) * in_;
+  const sc = mob ? 0.55 : 0.72;
   const targetX = side === 'right' ? w * (mob ? 0.78 : 0.82) : w * (mob ? 0.22 : 0.18);
-  const slide = mob ? 40 : 60;
-  const x = side === 'right'
-    ? lerp(targetX + slide, targetX, in_)
-    : lerp(targetX - slide, targetX, in_);
-  const y = groundY - (mob ? 8 : 12);
+  const slide = (mob ? 40 : 60) * (1 - fade);
+  const wander = Math.sin(t * 0.9) * (mob ? 10 : 16);
+  const x = (side === 'right' ? targetX + slide : targetX - slide) + wander;
+  const y = groundY - (mob ? 8 : 12) + Math.sin(t * 1.4) * 4;
 
   drawRockCreature(ctx, x, y, sc, t, {
-    alpha: in_,
+    alpha: fade,
     thumbsDown: true,
     label: 'FELS-WESEN · 👎',
   });

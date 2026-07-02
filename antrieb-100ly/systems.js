@@ -121,10 +121,13 @@ export const PHASES = [
 ].map((p) => ({ ...p, ...SYSTEMS[p.key] }));
 
 export function phaseAt(t) {
-  const p = (t % CYCLE) / CYCLE;
-  const ph = PHASES.find((x) => p >= x.p0 && p < x.p1) || PHASES[PHASES.length - 1];
+  const cycleT = ((t % CYCLE) + CYCLE) % CYCLE;
+  const p = cycleT / CYCLE;
+  const ph = PHASES.find((x, i) => (
+    i === PHASES.length - 1 ? p >= x.p0 : p >= x.p0 && p < x.p1
+  )) || PHASES[PHASES.length - 1];
   const local = (p - ph.p0) / Math.max(0.001, ph.p1 - ph.p0);
-  return { p, ph, local, t: t % CYCLE };
+  return { p, ph, local: Math.min(1, local), t: cycleT };
 }
 
 export function hash(x, y, t = 0) {

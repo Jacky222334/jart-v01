@@ -245,7 +245,7 @@ export function drawColonyPhase(ctx, local, t, w, h, layout = null) {
 
   if (A.key === 'dance') {
     drawDancingCats(ctx, cx, groundY, slowT(t), A.t, layout);
-    drawRockCreatureFinale(ctx, A.t, slowT(t), w, h, layout, 'left');
+    drawRockCreatureFinale(ctx, A.t, t, w, h, layout, 'left');
   }
 }
 

@@ -697,7 +697,15 @@ export class Antrieb100LY {
       this.splashT = (now - this.splashT0) * 0.001;
       this.drawLunch();
     } else if (!this.paused) {
-      this.time = (now - this.t0) * 0.001;
+      let elapsed = (now - this.t0) * 0.001;
+      if (elapsed >= CYCLE) {
+        const loops = Math.floor(elapsed / CYCLE);
+        this.t0 += loops * CYCLE * 1000;
+        elapsed -= loops * CYCLE;
+      }
+      this.time = elapsed;
+      this.draw();
+    } else if (this.launched) {
       this.draw();
     }
     this.raf = requestAnimationFrame((n) => this.tick(n));

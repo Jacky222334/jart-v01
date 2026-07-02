@@ -128,8 +128,14 @@ export function createTimeline(art, {
     return `${m}:${String(s).padStart(2, '0')}`;
   }
 
+  function normTime(t) {
+    return ((t % CYCLE) + CYCLE) % CYCLE;
+  }
+
   function clampTime(t) {
-    return Math.max(tMin, Math.min(tMax, ((t % CYCLE) + CYCLE) % CYCLE));
+    const n = normTime(t);
+    if (tMax >= CYCLE - 0.001 && tMin <= 0.001) return n;
+    return Math.max(tMin, Math.min(tMax, n));
   }
 
   function posToTime(clientX) {
@@ -180,13 +186,19 @@ export function createTimeline(art, {
   }
 
   function onScrubEnd() {
+    if (!dragging) return;
     dragging = false;
     root.classList.remove('scrubbing');
     if (wasPlaying) {
       art.paused = false;
       art.t0 = performance.now() - art.time * 1000;
+      wasPlaying = false;
     }
   }
+
+  track.addEventListener('lostpointercapture', onScrubEnd);
+  window.addEventListener('pointerup', onScrubEnd);
+  window.addEventListener('pointercancel', onScrubEnd);
 
   track.addEventListener('pointerdown', (e) => {
     e.preventDefault();
