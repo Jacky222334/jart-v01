@@ -1,11 +1,14 @@
 #!/usr/bin/env node
 /** Antrieb 100LY · Standalone static server */
 import { createServer } from 'node:http';
+import { existsSync } from 'node:fs';
 import { readFile, stat } from 'node:fs/promises';
 import { join, extname, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = fileURLToPath(new URL('.', import.meta.url));
+const HAIL_ROOT = [join(ROOT, 'hail-mary'), join(ROOT, '..', 'hail-mary')].find(existsSync)
+  ?? join(ROOT, 'hail-mary');
 const PORT = Number(process.env.PORT) || 8770;
 
 const MIME = {
@@ -26,8 +29,16 @@ async function serve(req, res) {
   try {
     let url = decodeURIComponent(new URL(req.url, `http://${req.headers.host}`).pathname);
     if (url === '/') url = '/index.html';
-    const safe = normalize(url).replace(/^(\.\.[/\\])+/, '');
-    let filePath = join(ROOT, safe);
+
+    let base = ROOT;
+    let path = url;
+    if (url === '/hail-mary' || url.startsWith('/hail-mary/')) {
+      base = HAIL_ROOT;
+      path = url === '/hail-mary' ? '/index.html' : url.slice('/hail-mary'.length) || '/index.html';
+    }
+
+    const safe = normalize(path).replace(/^(\.\.[/\\])+/, '');
+    let filePath = join(base, safe);
 
     let st = await stat(filePath).catch(() => null);
     if (!st) {

@@ -1,6 +1,7 @@
 import { Antrieb100LY } from './sketch.js';
 import { createTimeline } from './timeline.js';
 import { bindSafariPlayback, bindCanvasControls } from './mobile.js';
+import { readStartPhase, launchAtPhase } from './startPhase.js';
 
 const canvas = document.querySelector('canvas');
 const art = new Antrieb100LY(canvas);
@@ -11,6 +12,12 @@ bindCanvasControls(canvas, art, {
   timelineEl: timeline.el,
   isScrubbing: () => timeline.isScrubbing(),
 });
+
+const startKey = readStartPhase();
+if (startKey) {
+  launchAtPhase(art, startKey);
+  timeline.update();
+}
 
 function bindViewport() {
   const vv = window.visualViewport;
