@@ -114,10 +114,10 @@ export const PHASES = [
   { p0: 0.838, p1: 0.858, key: 'transit' },
   { p0: 0.858, p1: 0.885, key: 'hailmary' },
   { p0: 0.885, p1: 0.902, key: 'orbit' },
-  { p0: 0.902, p1: 0.918, key: 'reunion' },
-  { p0: 0.918, p1: 0.948, key: 'kolonie' },
-  { p0: 0.948, p1: 0.968, key: 'fusion' },
-  { p0: 0.968, p1: 1, key: 'posturknall' },
+  { p0: 0.902, p1: 0.916, key: 'reunion' },
+  { p0: 0.916, p1: 0.962, key: 'kolonie' },
+  { p0: 0.962, p1: 0.978, key: 'fusion' },
+  { p0: 0.978, p1: 1, key: 'posturknall' },
 ].map((p) => ({ ...p, ...SYSTEMS[p.key] }));
 
 export function phaseAt(t) {

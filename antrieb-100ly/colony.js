@@ -9,10 +9,15 @@ import {
 const TAU = Math.PI * 2;
 
 function act(local) {
-  if (local < 0.26) return { key: 'build', t: local / 0.26 };
-  if (local < 0.52) return { key: 'land', t: (local - 0.26) / 0.26 };
-  if (local < 0.78) return { key: 'station', t: (local - 0.52) / 0.26 };
-  return { key: 'dance', t: (local - 0.78) / 0.22 };
+  if (local < 0.18) return { key: 'build', t: local / 0.18 };
+  if (local < 0.34) return { key: 'land', t: (local - 0.18) / 0.16 };
+  if (local < 0.58) return { key: 'station', t: (local - 0.34) / 0.24 };
+  return { key: 'dance', t: (local - 0.58) / 0.42 };
+}
+
+/** Langsameres Tempo · Siedlung · Tanz */
+function slowT(t, scale = 0.42) {
+  return t * scale;
 }
 
 function drawColonyShip(ctx, x, y, prog, t) {
@@ -137,21 +142,22 @@ function drawTree(ctx, x, groundY, h, p, i, t) {
 
 function drawDancingCats(ctx, cx, groundY, t, prog, layout) {
   const p = ease(prog);
+  const st = slowT(t);
   const mob = layout?.phone;
   const sc = 0.95 * (layout?.phone ? 0.85 : 1);
 
-  const bethyX = cx - (mob ? 45 : 65) + Math.sin(t * 3) * 12 * p;
-  const janyX = cx + (mob ? 45 : 65) + Math.cos(t * 3.2) * 12 * p;
-  const bethyY = groundY - 20 - Math.abs(Math.sin(t * 4)) * 18 * p;
-  const janyY = groundY - 18 - Math.abs(Math.cos(t * 4.1)) * 16 * p;
+  const bethyX = cx - (mob ? 45 : 65) + Math.sin(st * 1.6) * 10 * p;
+  const janyX = cx + (mob ? 45 : 65) + Math.cos(st * 1.7) * 10 * p;
+  const bethyY = groundY - 20 - Math.abs(Math.sin(st * 2.2)) * 14 * p;
+  const janyY = groundY - 18 - Math.abs(Math.cos(st * 2.3)) * 12 * p;
 
-  drawCat(ctx, 'Bethy', bethyX, bethyY, sc, NEON.magenta, Math.sin(t * 5) * 4, t, false);
-  drawCat(ctx, 'Jany', janyX, janyY, sc, NEON.orange, Math.cos(t * 5) * 4, t + 1, false);
+  drawCat(ctx, 'Bethy', bethyX, bethyY, sc, NEON.magenta, Math.sin(st * 2.8) * 3, st, false);
+  drawCat(ctx, 'Jany', janyX, janyY, sc, NEON.orange, Math.cos(st * 2.8) * 3, st + 1, false);
 
   const notes = ['♪', '♫', '★', '♥', '✦'];
   for (let i = 0; i < 8; i++) {
-    const nx = cx + Math.sin(t * 2 + i) * (mob ? 80 : 120);
-    const ny = groundY - 60 - i * 8 - Math.sin(t * 3 + i * 2) * 15;
+    const nx = cx + Math.sin(st * 1.1 + i) * (mob ? 80 : 120);
+    const ny = groundY - 60 - i * 8 - Math.sin(st * 1.5 + i * 2) * 12;
     ctx.globalAlpha = p * (0.4 + hash(i, t) * 0.5);
     ctx.font = `${10 + i % 4}px monospace`;
     ctx.fillStyle = i % 2 ? NEON.yellow : NEON.cyan;
@@ -219,16 +225,17 @@ export function drawColonyPhase(ctx, local, t, w, h, layout = null) {
 
   if (A.key === 'station' || A.key === 'dance') {
     const stProg = A.key === 'station' ? A.t : 1;
+    const animT = A.key === 'dance' ? slowT(t) : slowT(t, 0.55);
     if (A.key === 'dance') {
-      drawParadiseSky(ctx, w, h, t);
+      drawParadiseSky(ctx, w, h, animT);
       drawParadiseGround(ctx, cx, groundY, w, 1);
-      drawWaterfalls(ctx, w, groundY, t, 1);
+      drawWaterfalls(ctx, w, groundY, animT, 1);
     }
     drawSettlement(ctx, cx, groundY, stProg);
-    drawRichGarden(ctx, cx, groundY, w, t, stProg, mob);
+    drawRichGarden(ctx, cx, groundY, w, animT, stProg, mob);
     if (A.key === 'station') {
-      drawCat(ctx, 'Bethy', cx - 40, groundY - 5, 0.8, NEON.magenta, 0, 0, t, false);
-      drawCat(ctx, 'Jany', cx + 40, groundY - 3, 0.8, NEON.orange, 0, 1, t, false);
+      drawCat(ctx, 'Bethy', cx - 40, groundY - 5, 0.8, NEON.magenta, 0, 0, animT, false);
+      drawCat(ctx, 'Jany', cx + 40, groundY - 3, 0.8, NEON.orange, 0, 1, animT, false);
       ctx.font = '9px monospace';
       ctx.fillStyle = NEON.green;
       ctx.fillText('🌳 Bäume · 🍊 Früchte · 💧 Wasser', cx, h * (mob ? 0.2 : 0.18));
@@ -236,7 +243,7 @@ export function drawColonyPhase(ctx, local, t, w, h, layout = null) {
   }
 
   if (A.key === 'dance') {
-    drawDancingCats(ctx, cx, groundY, t, A.t, layout);
+    drawDancingCats(ctx, cx, groundY, slowT(t), A.t, layout);
   }
 }
 

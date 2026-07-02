@@ -181,32 +181,33 @@ export function drawParadiseScene(ctx, local, t, w, h, layout, { fused = false, 
   const cx = w * 0.5;
   const groundY = h * (mob ? 0.7 : 0.66);
   const rich = ease(local);
+  const st = t * (fused ? 0.5 : 0.42);
 
-  drawParadiseSky(ctx, w, h, t);
+  drawParadiseSky(ctx, w, h, st);
   drawParadiseGround(ctx, cx, groundY, w, rich);
-  drawWaterfalls(ctx, w, groundY, t, rich);
+  drawWaterfalls(ctx, w, groundY, st, rich);
   drawSettlement(ctx, cx, groundY, rich);
-  drawRichGarden(ctx, cx, groundY, w, t, rich, mob);
+  drawRichGarden(ctx, cx, groundY, w, st, rich, mob);
 
-  const bethyX = cx - (mob ? 50 : 75) + Math.sin(t * 2.5) * 10;
-  const janyX = cx + (mob ? 50 : 75) + Math.cos(t * 2.8) * 10;
-  const catY = groundY - 15 - Math.abs(Math.sin(t * 3.5)) * 12;
+  const bethyX = cx - (mob ? 50 : 75) + Math.sin(st * 1.4) * 8;
+  const janyX = cx + (mob ? 50 : 75) + Math.cos(st * 1.5) * 8;
+  const catY = groundY - 15 - Math.abs(Math.sin(st * 2)) * 10;
 
   if (fused) {
-    drawFusedCat(ctx, cx, catY - 10, 1.15, t, 0.9);
+    drawFusedCat(ctx, cx, catY - 10, 1.15, st, 0.9);
   } else {
-    drawCat(ctx, 'Bethy', bethyX, catY, 0.95, NEON.magenta, Math.sin(t * 4) * 3, t, false);
-    drawCat(ctx, 'Jany', janyX, catY, 0.95, NEON.orange, Math.cos(t * 4) * 3, t + 1, false);
+    drawCat(ctx, 'Bethy', bethyX, catY, 0.95, NEON.magenta, Math.sin(st * 2.5) * 2.5, st, false);
+    drawCat(ctx, 'Jany', janyX, catY, 0.95, NEON.orange, Math.cos(st * 2.5) * 2.5, st + 1, false);
   }
 
   for (let i = 0; i < 12; i++) {
-    ctx.globalAlpha = 0.35 + hash(i, t) * 0.4;
+    ctx.globalAlpha = 0.35 + hash(i, st) * 0.4;
     ctx.font = `${9 + i % 5}px monospace`;
     ctx.fillStyle = i % 2 ? NEON.yellow : NEON.magenta;
     ctx.textAlign = 'center';
     ctx.fillText(['♪', '♥', '🍎', '✦', '♫'][i % 5],
-      cx + Math.sin(t * 1.5 + i) * (mob ? 90 : 140),
-      groundY - 50 - i * 6 - Math.sin(t * 2 + i) * 10);
+      cx + Math.sin(st * 0.9 + i) * (mob ? 90 : 140),
+      groundY - 50 - i * 6 - Math.sin(st * 1.2 + i) * 8);
   }
   ctx.globalAlpha = 1;
 
