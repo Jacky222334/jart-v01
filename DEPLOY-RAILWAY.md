@@ -38,6 +38,8 @@ Start: `node server.js` · Port aus `$PORT` (Railway setzt das automatisch).
 | `/` | Kiosk-Rotation (alle Werke) |
 | `/antrieb-100ly/` | Antrieb 100LY + Hail Mary Kontakt |
 | `/hail-mary/` | Standalone Astrophage-Film |
+| `/flight-dashboard/` | GPS/Globus/Agenten-UI (Hardware-APIs nur auf dem Pi) |
+| `/jart-kiosk/` | Kiosk |
 
 ## Lokal testen
 
@@ -46,8 +48,28 @@ node server.js
 # → http://127.0.0.1:8765/antrieb-100ly/
 ```
 
-## Pi (weiterhin optional)
+## Pi-Kiosk (fest · 11 Werke)
 
 ```bash
 ./deploy-pi-jart-kiosk.sh
 ```
+
+Rotation **ohne Shuffle**, je 2 Min, Autostart nach Reboot (systemd + linger).
+
+| # | Werk |
+|---|------|
+| 1 | Alternate 95v1 |
+| 2 | Blocks #8133 |
+| 3 | Penrose (custom-qmdNwJG) |
+| 4 | RGB-Würfel (custom-qmYinCe) |
+| 5 | Retro Pixel (custom5109) |
+| 6 | Hail Mary |
+| 7 | Veggåkle #34 |
+| 8 | uncertain index #327 |
+| 9 | Spectron #259 Neon |
+| 10 | Organic Neo · Galaxie |
+| 11 | Raster #1500 |
+
+URL auf dem Pi: `http://127.0.0.1:8765/jart-kiosk/pi.html`
+
+Playlist ändern: `jart-kiosk/manifest-pi.js` → erneut deployen.

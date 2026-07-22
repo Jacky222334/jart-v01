@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Blob Tracker · WLAN-Kamera</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <video id="cam" playsinline muted crossorigin="anonymous"></video>
+  <img id="still" alt="" crossorigin="anonymous" />
+  <canvas id="out"></canvas>
+
+  <aside id="panel">
+    <header>
+      <h1>Blob Tracker</h1>
+      <p class="src">WLAN-Live · Port von
+        <a href="https://github.com/nicholaspjm/touchdesigner-blobtracker" target="_blank" rel="noreferrer">TD</a>
+        /
+        <a href="https://github.com/nicholaspjm/web-blob-tracker" target="_blank" rel="noreferrer">Web Blob Tracker</a>
+      </p>
+    </header>
+
+    <label class="field">
+      Quelle
+      <select id="cam-source">
+        <option value="wlan" selected>WLAN-Kamera (IP)</option>
+        <option value="webcam">Mac-Webcam</option>
+      </select>
+    </label>
+
+    <div id="wlan-box">
+      <label class="field">
+        Stream-URL
+        <input id="cam-url" type="url" spellcheck="false" placeholder="http://192.168.1.50:8080/video" />
+      </label>
+      <div class="scan-row">
+        <button id="scan" type="button">WLAN suchen</button>
+        <span id="scan-status"></span>
+      </div>
+      <div id="scan-results" hidden></div>
+      <label class="field">
+        Preset anhängen
+        <select id="preset">
+          <option value="">— wählen —</option>
+          <option value="/api/tapo-mjpeg">Tapo C220 · MJPEG (lokal)</option>
+          <option value="/api/tapo-mjpeg?stream=main">Tapo C220 · main 1440p</option>
+          <option value=":8080/video">IP Webcam Android /video</option>
+          <option value=":81/stream">ESP32-CAM /stream</option>
+          <option value="/mjpeg/1">Axis-ähnlich /mjpeg/1</option>
+          <option value=":8081/video">DroidCam /video</option>
+        </select>
+      </label>
+    </div>
+
+    <button id="start" type="button">WLAN-Stream starten</button>
+    <div class="meta">
+      <span id="status">bereit</span>
+      <span id="fps">— fps</span>
+      <span id="count">0 blobs</span>
+    </div>
+
+    <div class="toggle-grid">
+      <label class="row"><input type="checkbox" id="t-brackets" checked /> Brackets</label>
+      <label class="row"><input type="checkbox" id="t-trails" checked /> Trails</label>
+      <label class="row"><input type="checkbox" id="t-links" checked /> Connections</label>
+      <label class="row"><input type="checkbox" id="t-dotted" /> Dotted</label>
+      <label class="row"><input type="checkbox" id="t-ids" checked /> IDs</label>
+      <label class="row"><input type="checkbox" id="t-metrics" checked /> Metrics</label>
+      <label class="row"><input type="checkbox" id="t-grid" /> Grid</label>
+      <label class="row"><input type="checkbox" id="t-invert" /> Invert</label>
+      <label class="row"><input type="checkbox" id="t-video" checked /> Videobild</label>
+      <label class="row"><input type="checkbox" id="t-mirror" /> Spiegeln</label>
+      <label class="row"><input type="checkbox" id="t-skip" /> Frame Skip</label>
+    </div>
+    <label class="field">
+      Drehung
+      <select id="rotate">
+        <option value="none">keine</option>
+        <option value="left" selected>90° links</option>
+        <option value="right">90° rechts</option>
+        <option value="180">180°</option>
+      </select>
+    </label>
+
+    <label class="slider">
+      Threshold <span id="threshold-val">130</span>
+      <input id="threshold" type="range" min="40" max="220" value="130" />
+    </label>
+    <label class="slider">
+      Min Area <span id="minarea-val">60</span>
+      <input id="minarea" type="range" min="20" max="800" value="60" />
+    </label>
+    <label class="slider">
+      Max Area <span id="maxarea-val">18000</span>
+      <input id="maxarea" type="range" min="500" max="40000" step="100" value="18000" />
+    </label>
+    <label class="slider">
+      Max Blobs <span id="maxblobs-val">32</span>
+      <input id="maxblobs" type="range" min="4" max="80" value="32" />
+    </label>
+    <label class="slider">
+      Detection-Res <span id="res-val">0.50</span>
+      <input id="res-scale" type="range" min="0.25" max="1" step="0.05" value="0.5" />
+    </label>
+    <label class="slider">
+      Motion Smooth <span id="motion-val">0.55</span>
+      <input id="motion-smooth" type="range" min="0" max="1" step="0.05" value="0.55" />
+    </label>
+    <label class="slider">
+      Line Smooth <span id="line-val">8</span>
+      <input id="line-smooth" type="range" min="2" max="16" value="8" />
+    </label>
+    <label class="slider">
+      Dicke <span id="thick-val">2</span>
+      <input id="thickness" type="range" min="1" max="6" step="0.25" value="2.25" />
+    </label>
+    <label class="field">Outline <input id="outline-color" type="color" value="#ff3b4a" /></label>
+    <label class="field">Trail <input id="trail-color" type="color" value="#ff8a9a" /></label>
+
+    <div class="ptz">
+      <span class="ptz-label">Kamera bewegen</span>
+      <div class="ptz-pad">
+        <button type="button" data-ptz="up" title="Hoch (↑)">▲</button>
+        <div class="ptz-mid">
+          <button type="button" data-ptz="left" title="Links (←)">◀</button>
+          <button type="button" data-ptz="stop" title="Stop (Space)">■</button>
+          <button type="button" data-ptz="right" title="Rechts (→)">▶</button>
+        </div>
+        <button type="button" data-ptz="down" title="Runter (↓)">▼</button>
+      </div>
+      <span id="ptz-status"></span>
+    </div>
+
+    <p class="hint">
+      Tapo C220: Preset wählen oder <code>/api/tapo-mjpeg</code> (Zugangsdaten aus <code>wlan_loca.txt</code>).
+      Bewegen: Pfeiltasten oder Pad · <code>?cam=/api/tapo-mjpeg&amp;autostart=1</code>.
+    </p>
+  </aside>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

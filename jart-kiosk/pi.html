@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>jart Pi Kiosk · fix · jbs3123</title>
+  <meta name="theme-color" content="#000000">
+  <script>
+    (() => {
+      const params = new URLSearchParams(location.search);
+      const rotate = params.get('rotate') || params.get('screen');
+      if (rotate === 'right' || rotate === '90') document.documentElement.classList.add('rotate-right');
+      if (rotate === 'left' || rotate === '270') document.documentElement.classList.add('rotate-left');
+    })();
+  </script>
+  <link rel="stylesheet" href="kiosk.css">
+</head>
+<body>
+  <div id="root">
+    <div id="stage">
+      <div id="frame-wrap">
+        <iframe id="art" title="jart animation" allow="camera *; microphone *; autoplay; serial; fullscreen" allowfullscreen></iframe>
+      </div>
+      <div class="glow glow-a"></div>
+      <div class="glow glow-b"></div>
+      <div id="rim"></div>
+    </div>
+  </div>
+  <div id="hud">
+    <div id="piece-num" aria-hidden="true">01</div>
+    <div id="speech-bubble"></div>
+    <div id="title"></div>
+    <div id="meta"></div>
+    <div id="bar"></div>
+  </div>
+  <script type="module">
+    import { PIECES, SLIDE_MS, SHUFFLE, STARTUP } from './manifest-pi.js';
+    import { initKiosk } from './kiosk-app.js';
+    import { initKioskSoundscape } from './kiosk-soundscape.js';
+    import { COSMIC_MUSIC } from './cosmic-music.js';
+    const params = new URLSearchParams(location.search);
+    const audio = !(params.has('noaudio') || params.get('audio') === '0');
+    const vol = parseFloat(params.get('vol') ?? '1');
+    const volume = Number.isFinite(vol) ? vol : 1;
+    const music = audio && params.get('music') !== '0';
+    const musicVol = parseFloat(params.get('musicvol') ?? '1');
+    const musicVolume = Number.isFinite(musicVol) ? musicVol : 1;
+    let scape = null;
+    if (audio && params.get('sound') !== '0') {
+      initKioskSoundscape(volume).then((s) => { scape = s; });
+    }
+    initKiosk({
+      pieces: PIECES,
+      slideMs: SLIDE_MS,
+      shuffle: SHUFFLE,
+      showGallery: false,
+      audio,
+      startup: STARTUP,
+      music,
+      musicPlaylist: COSMIC_MUSIC,
+      musicVolume,
+    });
+    window.addEventListener('pointerdown', () => scape?.resume(), { once: true });
+  </script>
+</body>
+</html>

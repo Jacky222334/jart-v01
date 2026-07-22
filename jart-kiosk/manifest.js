@@ -1,8 +1,18 @@
-/** Alle jart_v01-Animationen — je 2 Minuten, Basis-URL relativ zum HTTP-Root */
-export const SLIDE_MS = 120_000;
+/** Alle vorhandenen jart_v01-Animationen — je 30 Sekunden */
+export const SLIDE_MS = 30_000;
 
 export const PIECES = [
+  { title: 'Pages #2 · Rozendaal · ArtTab 10108', path: '/pages10108/index.html' },
+  { title: 'Pages #0 · Rozendaal · ArtTab 10086', path: '/pages10086/index.html' },
+  { title: 'Balance #7 · Rozendaal · ArtTab 10724', path: '/balance10724/index.html' },
+  { title: 'LIITH #64 · Datura · ArtTab 7655', path: '/liith7655/index.html' },
+  { title: 'LIITH #51 · Datura · ArtTab 7599', path: '/liith7599/index.html' },
+  { title: 'Rooms #33 · Rozendaal · ArtTab 11075', path: '/rooms11075/index.html' },
+  { title: 'Implosion #16 · Rozendaal · ArtTab 11073', path: '/implosion11073/index.html' },
+  { title: 'Radar Eye · USB Motion ◉', path: '/radar-eye/index.html?baud=256000' },
   { title: 'Antrieb 100LY · Alle Systeme ◉', path: '/antrieb-100ly/index.html' },
+  { title: 'Antrieb 100LY · Finale-Vorschau', path: '/antrieb-100ly/preview-finale.html' },
+  { title: 'Antrieb 100LY · Hail Mary Start', path: '/antrieb-100ly/preview-hailmary.html' },
   { title: 'PXL DEX Ultra · Asendorf ◉', path: '/pxl-dex-ultra/index.html' },
   { title: 'Spectron #259 · Neon Pixel ◉', path: '/spectron108-neon/index.html' },
   { title: 'Raketen-Wahn · Antimaterie ◉', path: '/raketen-wahn/index.html' },
@@ -16,11 +26,19 @@ export const PIECES = [
   { title: 'Orbit Couture · Catwalk ◉', path: '/raumanzug-catwalk/index.html' },
   { title: 'Hunger · Musk · Geld ◉', path: '/afrika-hunger-geld/index.html' },
   { title: 'Hail Mary · Astrophage ◉', path: '/hail-mary/index.html' },
+  { title: 'Hail Mary · Dance ◉', path: '/hail-mary-dance/index.html' },
+  { title: 'Hail Mary Wesen · 3D ◉', path: '/hail-mary-model/index.html' },
+  { title: 'Hail Mary V3 · Tanz ◉', path: '/hail-mary-v3-dance/index.html?rotate=right' },
   { title: 'Artemis · NASA ◉', path: '/artemis/index.html' },
+  { title: 'NASA Launch · Countdown ◉', path: '/nasa-launch/index.html' },
+  { title: 'Teil_SAS · NASA Ersatzteile ◉', path: '/teil-sas/index.html' },
   { title: 'Afrika · Sterben ◉', path: '/afrika-tod/index.html' },
   { title: 'Organic Neo · Galaxie ◉', path: '/organic-neo/index.html' },
+  { title: '10 schwerste Theorien · verständlich ◉', path: '/theorien-lego/index.html' },
+  { title: 'Familie · Kalendergedichte ◉', path: '/kalender-gedichte/index.html' },
+  { title: 'Liebevolle Momente · Pixelprosa ◉', path: '/liebe-momente/index.html' },
+  { title: 'Schönste Porträts · Fotos-Mediathek ◉', path: '/portrait-galerie/index.html' },
   { title: 'Veggåkle #34', path: '/veggakle5108/index.html' },
-  { title: 'Alternate 95v1 · Kim Asendorf', path: '/alternate10074/index.html' },
   {
     title: 'LIITH #17 · Datura',
     path: '/liith5113/index.html?fxhash=onnyEhfHFJ9FF71Wr8NPCYd9WCecc4GkKGGi1WfpbH1XZF6fxi8&fxminter=tz1WwHHT1uEZZZUZmApzB2SMrsNKvjTZ69hz&fxiteration=17&fxcontext=standalone&fxchain=TEZOS&fxparamsUpdate=41c12b5241800000#0x0e01403f000000000000403c000000000000405300000000000009',
@@ -34,7 +52,7 @@ export const PIECES = [
   { title: 'Rainbow L16-7F · Kim Asendorf', path: '/rainbow11127/index.html' },
   { title: 'Buying Time · Chomko', path: '/buyingtime/index.html' },
   { title: 'Prismflux', path: '/prismflux/index.html' },
-  { title: 'eukär · p1xelfool', path: '/eukar/index.html?seed=8606' },
+  { title: 'eukär · p1xelfool', path: '/index.html?seed=8606' },
   { title: 'Live Weltraum', path: '/space-live/index.html' },
   { title: 'Retro Pixel · IPFS', path: '/custom5109/index.html' },
   { title: 'Penrose · IPFS', path: '/custom-qmdNwJG/index.html' },

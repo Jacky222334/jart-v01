@@ -7,9 +7,13 @@
     "node": ">=20"
   },
   "scripts": {
-    "start": "node antrieb-100ly/server.js",
-    "dev": "node antrieb-100ly/server.js",
+    "start": "node server.js",
+    "dev": "node server.js",
+    "antrieb": "node antrieb-100ly/server.js",
     "kiosk": "node server.js"
   },
-  "private": true
+  "private": true,
+  "dependencies": {
+    "three": "^0.185.1"
+  }
 }

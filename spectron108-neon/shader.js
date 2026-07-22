@@ -1,4 +1,4 @@
-/** Spectron #259 · ArtTab #108 · Neon Pixel Dance Remix */
+/** Spectron #259 · ArtTab #108 · Goethe Farbenlehre · Gemälde */
 
 export const TOKEN = {
   arttab: 'https://arttab.xyz/a/108',
@@ -38,7 +38,7 @@ float i(float b,float a,float d){return floor(b*(d-a)+a+.5);}
 float f(float a){return floor(a+.5);}
 
 float hn(vec2 p){
-  return fract(sin(dot(floor(p*137.0),vec2(12.9898,78.233))+m*.07)*43758.5453);
+  return fract(sin(dot(floor(p*137.0),vec2(12.9898,78.233))+m*.002)*43758.5453);
 }
 
 vec2 xform(vec2 uv){
@@ -49,9 +49,12 @@ vec2 xform(vec2 uv){
   return c+.5;
 }
 
-vec2 pixelSnap(vec2 uv,vec2 px){
-  vec2 p=floor(uv*D/px)*px/D;
-  return p+px/D*0.5;
+vec2 paintWarp(vec2 uv){
+  float s=m*.006;
+  vec2 w;
+  w.x=sin(uv.y*4.+s)*.028+sin(uv.x*3.-s*.7)*.016;
+  w.y=cos(uv.x*4.5-s)*.024+cos(uv.y*2.5+s)*.018;
+  return uv+w;
 }
 
 vec3 spectronAt(vec2 b){
@@ -72,52 +75,75 @@ vec3 spectronAt(vec2 b){
   return e;
 }
 
-vec3 toNeon(vec3 col,float hot){
+vec3 softPaint(vec2 b){
+  vec2 px=2.8/D;
+  vec3 e=vec3(0.);
+  e+=spectronAt(b);
+  e+=spectronAt(b+vec2(px.x,px.y));
+  e+=spectronAt(b+vec2(-px.x,px.y));
+  e+=spectronAt(b+vec2(px.x,-px.y));
+  e+=spectronAt(b+vec2(-px.x,-px.y));
+  return e/5.;
+}
+
+vec3 goetheWheel(float t){
+  vec3 gelb=vec3(.82,.68,.12);
+  vec3 orange=vec3(.78,.32,.06);
+  vec3 rot=vec3(.62,.10,.06);
+  vec3 violett=vec3(.38,.12,.42);
+  vec3 blau=vec3(.08,.14,.42);
+  vec3 gruen=vec3(.14,.38,.16);
+  t=fract(t);
+  float s=t*6.;
+  if(s<1.) return mix(gelb,orange,s);
+  if(s<2.) return mix(orange,rot,s-1.);
+  if(s<3.) return mix(rot,violett,s-2.);
+  if(s<4.) return mix(violett,blau,s-3.);
+  if(s<5.) return mix(blau,gruen,s-4.);
+  return mix(gruen,gelb,s-5.);
+}
+
+vec3 toGoethePaint(vec3 col,vec2 uv){
   float lum=dot(col,x);
-  vec3 voidC=vec3(0.0,0.0,0.04);
-  vec3 cyan=vec3(0.0,1.0,1.0);
-  vec3 mag=vec3(1.0,0.0,0.92);
-  vec3 gold=vec3(1.0,0.92,0.0);
-  vec3 lime=vec3(0.4,1.0,0.2);
-  vec3 a=mix(voidC,cyan,smoothstep(0.02,0.35,lum));
-  vec3 b=mix(a,mag,smoothstep(0.25,0.55,lum));
-  vec3 c=mix(b,gold,smoothstep(0.45,0.75,lum));
-  vec3 outC=mix(c,lime,smoothstep(0.65,0.95,lum));
-  outC*=0.7+0.6*lum+hot*0.35;
-  return outC;
+  float chr=length(col-vec3(lum));
+  float wheelT=fract(lum*.9+chr*1.4+m*.007+sin(uv.x*5.+uv.y*4.+m*.01)*.14+cos(uv.y*6.-m*.008)*.1);
+  vec3 wheel=goetheWheel(wheelT);
+  vec3 outC=mix(wheel*.3,wheel,.45+.5*lum);
+  outC*=1.02+.06*sin(uv.x*2.1+m*.005)*sin(uv.y*1.6-m*.004);
+  return clamp(outC,0.,1.);
+}
+
+float canvasGrain(vec2 uv){
+  return .90+.06*hn(uv*900.)+.04*hn(uv*55.+m*.001);
+}
+
+float brushStroke(vec2 uv){
+  float ang=m*.005+uv.y*1.6+sin(m*.008)*.3;
+  vec2 dir=vec2(cos(ang),sin(ang));
+  return .94+.06*sin(dot(uv*110.,dir)+m*.012);
+}
+
+vec3 ageVarnish(vec3 c,vec2 raw){
+  vec3 warm=vec3(1.,.93,.78);
+  c=mix(c,c*warm,.38);
+  c*=canvasGrain(raw);
+  c*=brushStroke(raw);
+  float edge=length(raw-.5);
+  c*=1.-edge*edge*.55;
+  c=mix(c,c*.72,smoothstep(.25,.85,edge));
+  return c;
 }
 
 void main(){
   vec2 raw=gl_FragCoord.st/D.xy;
   vec2 uv=xform(raw);
+  uv=paintWarp(uv);
 
-  float dens=hn(raw*vec2(24.0,18.0)+m*0.03);
-  float dens2=hn(raw*vec2(7.0,11.0)-m*0.05);
-  float sparse=step(0.62,dens)*step(dens2,0.38);
-  float busy=step(0.72,dens2)*step(0.4,dens);
+  vec3 e=softPaint(uv);
+  e=toGoethePaint(e,uv);
+  e=ageVarnish(e,raw);
 
-  float pxBase=mix(6.0,42.0,0.5+0.5*sin(m*0.9+raw.x*8.0));
-  pxBase=mix(pxBase,pxBase*2.8,sparse);
-  pxBase=mix(pxBase,max(3.0,pxBase*0.35),busy);
-  pxBase*=1.0+0.25*sin(m*1.7+u_beat*6.28318);
-
-  vec2 px=vec2(pxBase);
-  vec2 b=pixelSnap(uv,px);
-
-  vec3 e=spectronAt(b);
-  float hot=busy*(0.4+0.6*sin(m*3.1+hn(b*90.0)*6.28));
-  e=toNeon(e,hot);
-
-  if(sparse>0.5) e*=0.35+0.15*hn(b*40.0);
-  if(busy>0.5){
-    float grid=step(0.5,fract(b.x*D.x/px.x))*step(0.5,fract(b.y*D.y/px.y));
-    e+=vec3(0.0,1.0,1.0)*grid*0.25;
-  }
-
-  float vig=0.55+0.45*sqrt(4.*raw.y*(1.-raw.y));
-  e*=vig;
-
-  gl_FragColor=vec4(e,1.0);
+  gl_FragColor=vec4(clamp(e,0.,1.),1.0);
 }
 `;
 

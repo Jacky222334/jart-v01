@@ -32,6 +32,11 @@ export class ColorEngine {
     this.t0 = performance.now();
     this.raf = null;
     this.onProfile = null;
+    this.audio = { bass: 0, mid: 0, treble: 0, beat: 0, rms: 0 };
+  }
+
+  feedAudio(a) {
+    this.audio = a;
   }
 
   applyProfile(p) {
@@ -57,14 +62,18 @@ export class ColorEngine {
     if (this.raf) return;
     const tick = (now) => {
       const p = this.profile;
-      const pulse = 0.5 + 0.5 * Math.sin((now - this.t0) / p.pulseMs * Math.PI * 2);
-      const drift = ((now - this.t0) / p.driftMs) % 1;
-      const hueShift = drift * 360;
+      const a = this.audio;
+      const wave = 0.5 + 0.5 * Math.sin((now - this.t0) / p.pulseMs * Math.PI * 2);
+      const pulse = Math.min(1, wave * 0.45 + a.bass * 0.55 + a.beat * 0.35);
+      const drift = ((now - this.t0) / p.driftMs + a.mid * 0.15) % 1;
+      const hueShift = drift * 360 + a.treble * 40;
 
       this.root.style.setProperty('--pulse', pulse.toFixed(4));
       this.root.style.setProperty('--hue-shift', `${hueShift.toFixed(2)}deg`);
-      this.root.style.setProperty('--glow-a', (0.15 + pulse * p.glow).toFixed(3));
-      this.root.style.setProperty('--glow-b', (0.08 + (1 - pulse) * p.glow * 0.85).toFixed(3));
+      this.root.style.setProperty('--sat', (p.sat + a.mid * 0.35).toFixed(3));
+      this.root.style.setProperty('--bright', (p.bright + a.rms * 0.12).toFixed(3));
+      this.root.style.setProperty('--glow-a', (0.12 + pulse * p.glow + a.beat * 0.25).toFixed(3));
+      this.root.style.setProperty('--glow-b', (0.06 + (1 - pulse) * p.glow * 0.85 + a.bass * 0.2).toFixed(3));
 
       this.raf = requestAnimationFrame(tick);
     };

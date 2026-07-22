@@ -86,6 +86,12 @@ export function computeLayout(w, h) {
       w: iw - (phone ? 16 : 40),
       labelMode: phone ? 'active' : 'all',
     },
+    audio: {
+      x: phone ? safe.left + 8 : safe.left + 20,
+      y: h - progressBottom - (phone ? 48 : 60),
+      w: phone ? Math.min(132, iw * 0.38) : 168,
+      h: phone ? 40 : 52,
+    },
     story: { fs: phone ? 0.82 : 1 },
   };
 }

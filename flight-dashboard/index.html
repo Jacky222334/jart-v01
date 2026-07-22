@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GPS · Globus · Zürich · Glarus</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+JP:wght@500;700;900&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+  <aside class="code-rail" aria-hidden="true">
+    <canvas id="codeRain"></canvas>
+  </aside>
+  <header class="top">
+    <div class="brand">
+      <span class="brand-mark">GPS</span>
+      <span class="brand-sub">Globus · Cams · Mic · Zürich · Näfels/Mollis</span>
+    </div>
+    <div class="status-stack">
+      <div class="status" id="gpsStatus">
+        <span class="dot" id="gpsDot"></span>
+        <span id="gpsText">GPS…</span>
+      </div>
+      <div class="status" id="micStatus">
+        <span class="dot" id="micDot"></span>
+        <span id="micText">Mic…</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- Immer laufende Globus-Animation -->
+    <section class="panel globe-panel">
+      <div id="globeWrap" class="globe-wrap">
+        <canvas id="globe"></canvas>
+        <div class="globe-vignette"></div>
+        <div class="globe-sweep" id="globeSweep"></div>
+        <div id="streetOverlay" class="street-overlay" aria-hidden="true">
+          <div id="streetMap" class="street-map"></div>
+          <canvas id="map3d" class="map3d-canvas"></canvas>
+          <div class="street-frame"></div>
+          <div class="street-badge">東京 3D · NEON MAP</div>
+        </div>
+        <div class="globe-hud">
+          <div class="hud-card you">
+            <label>Du bist hier</label>
+            <strong id="globeYou">—</strong>
+          </div>
+          <div class="hud-card dest zh">
+            <label>Distanz Zürich</label>
+            <strong id="zhDist">— km</strong>
+          </div>
+          <div class="hud-card dest glarus">
+            <label>Näfels · Mollis</label>
+            <strong id="glDist">— km</strong>
+            <span id="destSub">warte auf GPS-Fix…</span>
+          </div>
+        </div>
+        <div class="globe-legend">
+          <span class="lg you"><i></i> Standort</span>
+          <span class="lg zh"><i></i> Heimat Schweiz</span>
+          <span class="lg japan"><i></i> Japan 日本</span>
+          <span class="lg glarus"><i></i> Näfels/Mollis</span>
+          <span class="lg trail"><i></i> Verlauf</span>
+        </div>
+      </div>
+    </section>
+
+    <aside class="side">
+      <section class="panel map-panel neon-map">
+        <div id="map"></div>
+        <div class="map-neon-grid" aria-hidden="true"></div>
+        <div class="map-overlay">
+          <p class="map-city">東京 · TOKYO</p>
+          <p class="latlon"><span id="lat">—</span><br /><span id="lon">—</span></p>
+          <p class="utc" id="utc">—</p>
+        </div>
+      </section>
+
+      <section class="panel signal-panel">
+        <h2>Signalqualität</h2>
+        <div class="quality">
+          <div class="quality-ring" id="qualityRing">
+            <strong id="qualityScore">—</strong>
+            <span id="qualityLabel">—</span>
+          </div>
+          <div class="quality-bars">
+            <div class="qbar"><label>Fix</label><div class="track"><i id="barFix"></i></div><b id="fix">—</b></div>
+            <div class="qbar"><label>Sats</label><div class="track"><i id="barSats"></i></div><b id="sats">—</b></div>
+            <div class="qbar"><label>HDOP</label><div class="track"><i id="barHdop"></i></div><b id="hdop">—</b></div>
+            <div class="qbar"><label>SNR Ø</label><div class="track"><i id="barSnr"></i></div><b id="snrAvg">—</b></div>
+          </div>
+        </div>
+        <div class="gps-stats">
+          <div><label>Höhe</label><strong id="alt">—</strong></div>
+          <div><label>Speed</label><strong id="speed">—</strong></div>
+          <div><label>Kurs</label><strong id="course">—</strong></div>
+          <div><label>~Genauigkeit</label><strong id="acc">—</strong></div>
+        </div>
+        <div class="snr-bars" id="snrBars"></div>
+      </section>
+
+      <section class="panel mic-panel" id="micPanel" title="Klick = Live hören">
+        <div class="mic-head">
+          <h2>Audio · 4 Kanäle</h2>
+          <button type="button" class="listen-btn" id="listenBtn">▶ Live hören</button>
+        </div>
+        <p class="mic-hint" id="micHint">L/R real · Mid/Side · Klick zum Abhören</p>
+        <div class="mic-meters mic-meters-4">
+          <div class="meter" data-ch="1">
+            <div class="meter-label"><span>1 · ROTA</span><b id="mic1Db">— dB</b></div>
+            <div class="meter-track vert"><i id="mic1Bar"></i><em class="peak" id="mic1Peak"></em></div>
+            <span class="meter-sub">L</span>
+          </div>
+          <div class="meter" data-ch="2">
+            <div class="meter-label"><span>2 · ANDŌ</span><b id="mic2Db">— dB</b></div>
+            <div class="meter-track vert"><i id="mic2Bar"></i><em class="peak" id="mic2Peak"></em></div>
+            <span class="meter-sub">R</span>
+          </div>
+          <div class="meter" data-ch="3">
+            <div class="meter-label"><span>3 · YUSTO</span><b id="mic3Db">— dB</b></div>
+            <div class="meter-track vert"><i id="mic3Bar"></i><em class="peak" id="mic3Peak"></em></div>
+            <span class="meter-sub">Mid</span>
+          </div>
+          <div class="meter" data-ch="4">
+            <div class="meter-label"><span>4 · YAN</span><b id="mic4Db">— dB</b></div>
+            <div class="meter-track vert"><i id="mic4Bar"></i><em class="peak" id="mic4Peak"></em></div>
+            <span class="meter-sub">Side</span>
+          </div>
+        </div>
+        <audio id="liveAudio" preload="none"></audio>
+      </section>
+    </aside>
+
+    <section class="panel cams-panel">
+      <div class="cams-head">
+        <h2>Kameras · Agenten</h2>
+        <span class="cams-note">ROTA · ANDŌ · YUSTO · YAN · 写真</span>
+      </div>
+      <div class="cam-grid" id="camGrid"></div>
+    </section>
+
+    <section class="panel upload-panel" id="uploadPanel" aria-label="Foto Video Upload"></section>
+
+    <section class="panel expense-panel" id="expensePanel" aria-label="Ausgaben und Konto"></section>
+
+    <section class="panel route-panel" id="routeTimeline" aria-label="GPS Reiseverlauf"></section>
+
+    <section class="panel team-panel" id="teamStory" aria-label="Team Story"></section>
+  </main>
+
+  <footer class="help">
+    <p>u-blox 7 · Globus · 4× Cam-SIM · Distanz Zürich &amp; Näfels/Mollis · DJI Mic Mini</p>
+  </footer>
+
+  <script src="intro.js"></script>
+  <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="map3d.js"></script>
+  <script src="globe.js"></script>
+  <script src="cams.js"></script>
+  <script src="diaries.js"></script>
+  <script src="albums.js"></script>
+  <script src="upload.js"></script>
+  <script src="expenses.js"></script>
+  <script src="route-timeline.js"></script>
+  <script src="code-rain.js"></script>
+  <script src="meet.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

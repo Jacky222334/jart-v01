@@ -1,5 +1,6 @@
 /** Hail Mary · Eridian · Rocky · Kontakt zu DIR · Zoom · Daumen runter */
 import { NEON, ease, lerp, hash } from './systems.js';
+import { audioMeter } from './audioLevel.js';
 
 const TAU = Math.PI * 2;
 const ROCKY = '#aa88ff';
@@ -26,10 +27,12 @@ let lastTtsAt = -1;
 export function resetHailMaryAudio() {
   ttsIdx = 0;
   lastTtsAt = -1;
+  audioMeter.setCommsActive(false);
 }
 
 export function updateHailMaryAudio(local, key, t) {
   if (key !== 'hailmary' || typeof speechSynthesis === 'undefined') return;
+  audioMeter.setCommsActive(true);
   const thresholds = [0.42, 0.55, 0.72, 0.88];
   while (ttsIdx < thresholds.length && local >= thresholds[ttsIdx] && lastTtsAt < thresholds[ttsIdx]) {
     lastTtsAt = thresholds[ttsIdx];
@@ -37,6 +40,7 @@ export function updateHailMaryAudio(local, key, t) {
     u.lang = 'de-DE';
     u.rate = 0.88;
     u.pitch = 0.75;
+    audioMeter.tapUtterance(u);
     speechSynthesis.speak(u);
     ttsIdx += 1;
   }

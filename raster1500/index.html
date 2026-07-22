@@ -3,32 +3,81 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Raster #1500 — homage</title>
+  <title>Raster #1500 · Spotify</title>
   <meta name="theme-color" content="#000000">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body {
       width: 100%; height: 100%; overflow: hidden;
       background: #000;
+      font-family: "IBM Plex Mono", "SF Mono", Consolas, monospace;
+      color: #c8c8c8;
     }
-    img {
+    #c {
       display: block;
-      width: 100vw; height: 100vh;
-      object-fit: contain;
+      width: 100%; height: 100%;
+      cursor: pointer;
       image-rendering: pixelated;
-      image-rendering: crisp-edges;
     }
-    #hint {
-      position: fixed; bottom: 1.2rem; right: 1.4rem;
-      font-family: "SF Mono", Consolas, monospace;
-      font-size: 0.58rem; letter-spacing: 0.1em;
+    #hud {
+      position: fixed; left: 16px; bottom: 16px;
+      display: flex; flex-direction: column; gap: 8px;
+      z-index: 2; pointer-events: none;
+    }
+    #audio-btn {
+      pointer-events: auto;
+      align-self: flex-start;
+      border: 1px solid #555;
+      background: rgba(0, 0, 0, 0.65);
+      color: #eee;
+      padding: 8px 14px;
+      font: inherit;
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+    }
+    #audio-btn:hover { border-color: #4af; color: #fff; }
+    #audio-btn.on { border-color: #06f; color: #8cf; }
+    #status { font-size: 11px; opacity: 0.65; letter-spacing: 0.05em; }
+    #credit {
+      position: fixed; bottom: 16px; right: 16px;
+      font-size: 11px; letter-spacing: 0.1em;
       color: rgba(255, 255, 255, 0.28);
-      pointer-events: none;
+      z-index: 2; pointer-events: none;
     }
+    #tip {
+      position: fixed; right: 16px; bottom: 48px;
+      max-width: 300px;
+      padding: 12px 14px;
+      background: rgba(0, 0, 0, 0.72);
+      border: 1px solid #333;
+      font-size: 11px;
+      line-height: 1.45;
+      z-index: 2;
+    }
+    #tip strong { display: block; margin-bottom: 6px; color: #eee; }
+    #tip ol { padding-left: 16px; margin-bottom: 6px; }
+    #tip a { color: #8cf; }
+    #tip .muted { opacity: 0.6; margin-top: 4px; }
+    @media (max-width: 700px) { #tip { display: none; } }
   </style>
 </head>
 <body>
-  <img id="art" src="1500-anim.avif" alt="Raster #1500">
-  <div id="hint">bits.raster.art · #1500</div>
+  <canvas id="c" aria-label="Raster #1500 wireframe mountain"></canvas>
+  <div id="hud">
+    <button id="audio-btn" type="button">Spotify hören</button>
+    <div id="status">idle · Spotify</div>
+  </div>
+  <aside id="tip">
+    <strong>Mac-Mikrofon</strong>
+    <ol>
+      <li>Spotify abspielen (Lautsprecher an)</li>
+      <li><em>Spotify hören</em> → Mikrofon erlauben</li>
+      <li>Nutzt automatisch das Built-in Mic</li>
+    </ol>
+    <p class="muted">A = Audio · Leertaste / Klick = Pause</p>
+  </aside>
+  <div id="credit">bits.raster.art · #1500</div>
+  <script type="module" src="app.js"></script>
 </body>
 </html>

@@ -68,9 +68,12 @@ export class SpectronNeon {
   }
 
   dynamics(t) {
-    const zoom = 0.78 + 0.28 * Math.sin(t * 0.31) + 0.12 * Math.sin(t * 0.73 + 1.2);
-    const rot = t * 0.22 + Math.sin(t * 0.17) * 0.65 + Math.cos(t * 0.41) * 0.35;
-    const beat = (t * 0.55) % 1;
+    const a = window.__jartAudio || {};
+    const bass = (a.bass ?? 0) * 0.08;
+    const mid = (a.mid ?? 0) * 0.06;
+    const zoom = 0.92 + 0.05 * Math.sin(t * 0.035 + 0.4) + bass * 0.02;
+    const rot = t * 0.012 + Math.sin(t * 0.022) * 0.06 + mid * 0.04;
+    const beat = 0.5 + 0.5 * Math.sin(t * 0.018);
     return { zoom, rot, beat };
   }
 
@@ -81,7 +84,7 @@ export class SpectronNeon {
 
     gl.useProgram(this.prog);
     gl.uniform2f(this.uniforms.D, gl.canvas.width, gl.canvas.height);
-    gl.uniform1f(this.uniforms.m, t * 0.025);
+    gl.uniform1f(this.uniforms.m, t * 0.0045);
     gl.uniform1f(this.uniforms.I, 0);
     gl.uniform1fv(this.uniforms.c, this.values);
     gl.uniform1f(this.uniforms.u_zoom, zoom);
@@ -122,7 +125,7 @@ export class SpectronNeon {
       if (!blob) return;
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = `spectron108-neon-${Date.now()}.png`;
+      a.download = `spectron108-gemaelde-${Date.now()}.png`;
       a.click();
       URL.revokeObjectURL(a.href);
     });

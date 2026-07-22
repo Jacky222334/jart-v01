@@ -2,7 +2,7 @@
 Type=Application
 Name=jart Kiosk
 Comment=Alle jart Animationen · HDMI-2
-Exec=/bin/bash -lc 'sleep 12 && /home/jbs3123/start-jart-kiosk.sh start'
+Exec=/bin/bash -lc 'sleep 12 && systemctl --user restart jart-kiosk.service'
 Hidden=false
 NoDisplay=false
 X-GNOME-Autostart-enabled=true

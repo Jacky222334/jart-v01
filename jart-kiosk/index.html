@@ -5,105 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>jart Kiosk · jbs3123</title>
   <meta name="theme-color" content="#000000">
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body {
-      width: 100%; height: 100%; overflow: hidden;
-      background: #000;
-      font-family: "SF Mono", Consolas, monospace;
-      color: rgba(255, 255, 255, 0.7);
-    }
-
-    #root {
-      --sat: 1.4;
-      --bright: 1.1;
-      --contrast: 1.06;
-      --hue-shift: 0deg;
-      --pulse: 0.5;
-      --glow: 0.5;
-      --glow-a: 0.35;
-      --glow-b: 0.25;
-      --h1: 0;
-      --h2: 200;
-      --h3: 300;
-      --blend-a: screen;
-      --blend-b: overlay;
-      position: fixed; inset: 0;
-    }
-
-    #stage {
-      position: absolute; inset: 0;
-      filter: hue-rotate(var(--hue-shift)) saturate(var(--sat)) brightness(var(--bright)) contrast(var(--contrast));
-      transition: filter 1.2s ease;
-    }
-
-    #frame-wrap {
-      position: absolute; inset: 0;
-      opacity: 1;
-      transition: opacity 1.4s ease;
-    }
-    #frame-wrap.fade { opacity: 0; }
-
-    iframe {
-      position: absolute; inset: 0;
-      width: 100%; height: 100%;
-      border: 0;
-      background: #000;
-    }
-
-    .glow {
-      position: absolute; inset: 0; pointer-events: none;
-      mix-blend-mode: var(--blend-a);
-      opacity: var(--glow-a);
-      transition: opacity 0.8s ease, mix-blend-mode 1s ease;
-    }
-    .glow-a {
-      background:
-        radial-gradient(ellipse 90% 70% at 20% 30%, hsl(var(--h1) 100% 58% / 0.55), transparent 62%),
-        radial-gradient(ellipse 80% 60% at 80% 70%, hsl(var(--h2) 100% 52% / 0.45), transparent 58%);
-    }
-    .glow-b {
-      mix-blend-mode: var(--blend-b);
-      opacity: var(--glow-b);
-      background:
-        radial-gradient(circle at 50% 100%, hsl(var(--h3) 100% 50% / 0.4), transparent 55%),
-        linear-gradient(125deg, hsl(var(--h1) 100% 45% / 0.12), transparent 40%, hsl(var(--h2) 100% 55% / 0.15));
-    }
-
-    #rim {
-      position: absolute; inset: 0; pointer-events: none;
-      box-shadow:
-        inset 0 0 120px hsl(var(--h2) 100% 50% / calc(var(--pulse) * 0.22)),
-        inset 0 0 40px hsl(var(--h1) 100% 60% / calc(var(--pulse) * 0.12));
-    }
-
-    #hud {
-      position: fixed; inset: 0; pointer-events: none; z-index: 5;
-    }
-    #title {
-      position: absolute; top: 1.1rem; left: 1.3rem;
-      font-size: 0.62rem; letter-spacing: 0.2em; text-transform: uppercase;
-      text-shadow: 0 0 12px hsl(var(--h1) 100% 60% / 0.6);
-    }
-    #meta {
-      position: absolute; top: 1.1rem; right: 1.3rem;
-      font-size: 0.55rem; letter-spacing: 0.12em;
-      color: rgba(255, 255, 255, 0.35);
-    }
-    #bar {
-      position: absolute; bottom: 0; left: 0; height: 3px; width: 0%;
-      background: linear-gradient(90deg,
-        hsl(var(--h1) 100% 55%), hsl(var(--h2) 100% 60%), hsl(var(--h3) 100% 50%));
-      box-shadow: 0 0 16px hsl(var(--h1) 100% 60% / 0.8);
-      transition: width 0.25s linear;
-    }
-  </style>
+  <link rel="stylesheet" href="kiosk.css">
 </head>
 <body>
   <div id="root">
     <div id="stage">
       <div id="frame-wrap">
-        <iframe id="art" title="jart animation" allow="autoplay"></iframe>
+        <iframe id="art" title="jart animation" allow="autoplay; serial"></iframe>
       </div>
       <div class="glow glow-a"></div>
       <div class="glow glow-b"></div>
@@ -111,79 +19,26 @@
     </div>
   </div>
   <div id="hud">
+    <div id="piece-num" aria-hidden="true">01</div>
     <div id="title"></div>
     <div id="meta"></div>
+    <a id="gallery-link" href="/uebersicht/">Übersicht</a>
     <div id="bar"></div>
   </div>
   <script type="module">
     import { PIECES, SLIDE_MS } from './manifest.js';
-    import { ColorEngine } from './overlay.js';
-
-    const art = document.getElementById('art');
-    const wrap = document.getElementById('frame-wrap');
-    const titleEl = document.getElementById('title');
-    const metaEl = document.getElementById('meta');
-    const barEl = document.getElementById('bar');
-    const root = document.getElementById('root');
-    const engine = new ColorEngine(root);
-
-    let order = [];
-    let index = 0;
-    let slideStart = 0;
-    let barTimer = null;
-
-    function shuffle(arr) {
-      const a = [...arr];
-      for (let i = a.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [a[i], a[j]] = [a[j], a[i]];
-      }
-      return a;
-    }
-
-    function newCycle() {
-      order = shuffle(PIECES);
-      index = 0;
-    }
-
-    function tickBar() {
-      const elapsed = Date.now() - slideStart;
-      const pct = Math.min(100, (elapsed / SLIDE_MS) * 100);
-      barEl.style.width = pct + '%';
-    }
-
-    function showPiece(i) {
-      const piece = order[i];
-      titleEl.textContent = piece.title;
-      metaEl.textContent = `${i + 1}/${order.length} · ${Math.round(SLIDE_MS / 60000)} min`;
-      engine.randomize();
-      wrap.classList.add('fade');
-      setTimeout(() => {
-        art.src = piece.path;
-        wrap.classList.remove('fade');
-      }, 700);
-      slideStart = Date.now();
-      barEl.style.width = '0%';
-    }
-
-    function advance() {
-      index = (index + 1) % order.length;
-      if (index === 0) order = shuffle(PIECES);
-      showPiece(index);
-    }
-
-    newCycle();
-    engine.start();
-    showPiece(0);
-    barTimer = setInterval(tickBar, 200);
-    setInterval(advance, SLIDE_MS);
-
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowRight' || e.key === 'n' || e.key === 'N') advance();
-      if (e.key === 'ArrowLeft' || e.key === 'p' || e.key === 'P') {
-        index = (index - 1 + order.length) % order.length;
-        showPiece(index);
-      }
+    import { initKiosk } from './kiosk-app.js';
+    import { COSMIC_MUSIC } from './cosmic-music.js';
+    const params = new URLSearchParams(location.search);
+    const musicVol = parseFloat(params.get('musicvol') ?? '1');
+    initKiosk({
+      pieces: PIECES,
+      slideMs: SLIDE_MS,
+      shuffle: true,
+      showGallery: true,
+      music: params.get('music') === '1',
+      musicPlaylist: COSMIC_MUSIC,
+      musicVolume: Number.isFinite(musicVol) ? musicVol : 1,
     });
   </script>
 </body>

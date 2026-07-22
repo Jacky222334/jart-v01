@@ -18,6 +18,7 @@ import { drawColonyPhase, isKoloniePhase } from './colony.js';
 import { drawHappyEnd } from './paradise.js';
 import { drawLunchGate, hitLunchGate } from './lunch.js';
 import { computeLayout, layoutCapsule } from './layout.js';
+import { audioMeter } from './audioLevel.js';
 
 const TAU = Math.PI * 2;
 
@@ -539,6 +540,7 @@ export class Antrieb100LY {
     }
 
     this.drawSensorLegend(ctx, tel, this.time);
+    audioMeter.draw(ctx, this.layout, this.time);
 
     ctx.textAlign = 'left';
     ctx.fillStyle = '#222';
@@ -596,6 +598,9 @@ export class Antrieb100LY {
       this.lastPhaseKey = k;
     }
     if (hailmary) updateHailMaryAudio(state.local, k, t);
+    else if (this.lastPhaseKey === 'hailmary') audioMeter.setCommsActive(false);
+
+    audioMeter.tick();
 
     this.shake = finale ? 0 : intro || hailmary || relativ || kolonie ? 0 : ['boost', 'quantum', 'nuclear', 'antimatter'].includes(k) ? spd * 2 : spd * 0.5;
     if (k === 'orbit') this.shake = 0;
@@ -690,6 +695,7 @@ export class Antrieb100LY {
     this.time = 0;
     this.t0 = performance.now();
     this.paused = false;
+    audioMeter.resume();
     const hint = document.getElementById('hint');
     if (hint) hint.classList.add('visible');
     this.canvas.style.cursor = 'crosshair';
@@ -734,6 +740,7 @@ export class Antrieb100LY {
     }
     this.time = ((seconds % CYCLE) + CYCLE) % CYCLE;
     this.t0 = performance.now() - this.time * 1000;
+    audioMeter.resume();
     this.draw();
   }
 

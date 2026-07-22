@@ -1,40 +1,32 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Custom Art — homage</title>
-  <meta name="theme-color" content="#000000">
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body {
-      width: 100%; height: 100%; overflow: hidden;
-      background: #000;
-    }
-    video {
-      display: block;
-      width: 100vw; height: 100vh;
-      object-fit: contain;
-      background: #000;
-    }
-    #hint {
-      position: fixed; bottom: 1.2rem; right: 1.4rem;
-      font-family: "SF Mono", Consolas, monospace;
-      font-size: 0.58rem; letter-spacing: 0.1em;
-      color: rgba(255, 255, 255, 0.28);
-      pointer-events: none;
-    }
-  </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>custom5109 · Spotify</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <video id="art" src="artifact.mp4" autoplay loop muted playsinline></video>
-  <div id="hint">klick · pause</div>
-  <script>
-    const art = document.getElementById('art');
-    art.addEventListener('click', () => (art.paused ? art.play() : art.pause()));
-    window.addEventListener('keydown', (e) => {
-      if (e.key === ' ') { e.preventDefault(); art.paused ? art.play() : art.pause(); }
-    });
-  </script>
+  <canvas id="c"></canvas>
+  <div id="hud">
+    <button id="audio-btn" type="button">Spotify hören</button>
+    <div id="status">idle · klick für Spotify</div>
+    <div id="meters" aria-hidden="true">
+      <div class="m"><span>bass</span><i id="m-bass"></i></div>
+      <div class="m"><span>mid</span><i id="m-mid"></i></div>
+      <div class="m"><span>treble</span><i id="m-treble"></i></div>
+    </div>
+  </div>
+  <aside id="tip">
+    <strong>Mac-Mikrofon</strong>
+    <ol>
+      <li>Spotify abspielen (Lautsprecher an)</li>
+      <li><em>Spotify hören</em> → Mikrofon erlauben</li>
+      <li>Nutzt automatisch das Built-in Mic</li>
+    </ol>
+    <p class="hint">Systemeinstellungen → Datenschutz → Mikrofon → Browser erlauben.</p>
+    <p class="hint">Leertaste / Klick = Pause · A = Audio</p>
+  </aside>
+  <script type="module" src="app.js"></script>
 </body>
 </html>

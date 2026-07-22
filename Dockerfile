@@ -1,7 +1,10 @@
 FROM node:20-alpine
 WORKDIR /app
-COPY antrieb-100ly/ ./
-COPY hail-mary/ ./hail-mary/
+
+COPY package.json package-lock.json* ./
+RUN npm install --omit=dev
+
+COPY . .
 ENV NODE_ENV=production
-EXPOSE 8770
+EXPOSE 8765
 CMD ["node", "server.js"]

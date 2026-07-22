@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>USB erkennen</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <main class="wrap">
+    <header class="head">
+      <h1>USB erkennen</h1>
+      <p class="sub">Angeschlossene Geräte · live</p>
+      <div class="meta">
+        <span id="count">—</span>
+        <span id="stamp">—</span>
+        <button type="button" id="refresh">Aktualisieren</button>
+      </div>
+    </header>
+
+    <section class="chips" id="chips" aria-label="Schnellstatus"></section>
+    <section class="list" id="list" aria-live="polite"></section>
+
+    <footer class="foot">
+      <div><strong>Video</strong> <span id="video">—</span></div>
+      <div><strong>MIDI</strong> <span id="midi">—</span></div>
+    </footer>
+  </main>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
