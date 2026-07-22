@@ -6,6 +6,9 @@
   "engines": {
     "node": ">=20"
   },
+  "volta": {
+    "node": "24.11.0"
+  },
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
