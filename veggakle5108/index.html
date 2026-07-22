@@ -3,21 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Wall Rug / Veggåkle #34 — homage</title>
-  <meta name="description" content="Stipple-Berglandschaft — Hommage an Norwegian Husflid">
+  <title>Wall Rug / Veggåkle #34 — Spotify</title>
+  <meta name="description" content="Stipple-Berglandschaft — Hommage an Norwegian Husflid · musikreaktiv">
   <meta name="theme-color" content="#030303">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body {
       width: 100%; height: 100%; overflow: hidden;
       background: #030303;
-      font-family: "SF Mono", "Consolas", monospace;
+      font-family: "IBM Plex Mono", "SF Mono", "Consolas", monospace;
+      color: #c8c8c8;
     }
     canvas {
       display: block;
       width: 100vw; height: 100vh;
       image-rendering: pixelated;
       image-rendering: crisp-edges;
+      cursor: pointer;
     }
     #overlay {
       position: fixed; inset: 0; pointer-events: none; z-index: 2;
@@ -35,14 +37,62 @@
       color: rgba(255, 255, 255, 0.28);
       opacity: 0; animation: in 2s ease 2s forwards;
     }
+    #hud {
+      position: absolute; left: 1.2rem; bottom: 1.2rem;
+      display: flex; flex-direction: column; gap: 8px;
+      pointer-events: none;
+    }
+    #audio-btn {
+      pointer-events: auto;
+      align-self: flex-start;
+      border: 1px solid #555;
+      background: rgba(0, 0, 0, 0.65);
+      color: #eee;
+      padding: 8px 14px;
+      font: inherit;
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+    }
+    #audio-btn:hover { border-color: #8c6; color: #fff; }
+    #audio-btn.on { border-color: #6f6; color: #9f9; }
+    #status { font-size: 11px; opacity: 0.65; letter-spacing: 0.05em; }
+    #tip {
+      position: absolute; right: 1.2rem; bottom: 3.2rem;
+      max-width: 300px;
+      padding: 12px 14px;
+      background: rgba(0, 0, 0, 0.72);
+      border: 1px solid #333;
+      font-size: 11px;
+      line-height: 1.45;
+      pointer-events: auto;
+    }
+    #tip strong { display: block; margin-bottom: 6px; color: #eee; }
+    #tip ol { padding-left: 16px; margin-bottom: 6px; }
+    #tip a { color: #8cf; }
+    #tip .muted { opacity: 0.6; margin-top: 4px; }
     @keyframes in { to { opacity: 1; } }
+    @media (max-width: 700px) { #tip { display: none; } }
   </style>
 </head>
 <body>
   <canvas aria-label="Veggåkle #34 Stipple Mountains"></canvas>
   <div id="overlay">
     <div id="title">veggåkle #34 <span>· norwegian husflid</span></div>
-    <div id="hint">s · speichern · klick · pause</div>
+    <div id="hud">
+      <button id="audio-btn" type="button">Spotify hören</button>
+      <div id="status">idle · Spotify</div>
+    </div>
+    <aside id="tip">
+      <strong>Mac-Mikrofon</strong>
+      <ol>
+        <li>Spotify abspielen (Lautsprecher an)</li>
+        <li><em>Spotify hören</em> → Mikrofon erlauben</li>
+        <li>Nutzt automatisch das Built-in Mic</li>
+      </ol>
+      <p class="muted">A = Audio · Leertaste / Klick = Pause · S = speichern</p>
+    </aside>
+    <div id="hint">s · speichern · klick · pause · a · audio</div>
   </div>
   <script type="module" src="app.js"></script>
 </body>

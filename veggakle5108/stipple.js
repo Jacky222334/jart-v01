@@ -1,4 +1,4 @@
-/** Wall Rug / Veggåkle #34 — Stipple-Berg (Norwegian Husflid) */
+/** Wall Rug / Veggåkle #34 — Stipple-Berg (Norwegian Husflid) · musikreaktiv */
 
 export const PALETTE = [
   [5, 0, 0],
@@ -28,10 +28,11 @@ function hash(x, y, z) {
 }
 
 /** Berg-Silhouette — mehrere Gipfel, inspiriert vom Original */
-export function mountainTop(xNorm) {
+export function mountainTop(xNorm, lift = 0) {
   const x = xNorm * Math.PI * 2.4 - 0.6;
   return (
     0.52
+    + lift
     + 0.14 * Math.sin(x * 1.0 + 0.4)
     + 0.09 * Math.sin(x * 2.3 + 1.1)
     + 0.06 * Math.sin(x * 4.7 + 2.0)
@@ -40,53 +41,61 @@ export function mountainTop(xNorm) {
   );
 }
 
-export function inMountain(x, y, w, h) {
+export function inMountain(x, y, w, h, a) {
   const xn = x / w;
   const yn = 1 - y / h;
   if (yn < 0.08) return false;
-  const ridge = mountainTop(xn);
-  const micro = (hash(Math.floor(x * 0.5), Math.floor(y * 0.5), 0) - 0.5) * 0.018;
+  const lift = a.bass * 0.08 + a.beat * 0.05;
+  const ridge = mountainTop(xn, lift);
+  const micro = (hash(Math.floor(x * 0.5), Math.floor(y * 0.5), 0) - 0.5) * (0.018 + a.treble * 0.02);
   return yn <= ridge + micro;
 }
 
-export function pickColor(x, y, w, h, frame) {
+export function pickColor(x, y, w, h, frame, a) {
   const yn = 1 - y / h;
   const xn = x / w;
-  const ridge = mountainTop(xn);
+  const lift = a.bass * 0.08 + a.beat * 0.05;
+  const ridge = mountainTop(xn, lift);
   const heightT = Math.max(0, Math.min(1, (yn - 0.1) / Math.max(0.01, ridge - 0.05)));
-  const r = hash(x, y, frame * 0.31);
+  const r = hash(x, y, frame * 0.31 + a.mid * 8);
 
+  // beat flashes whites / pinks at the ridge
+  if (a.beat > 0.45 && heightT > 0.7 && r > 0.4) return PALETTE[14];
   if (heightT > 0.88 && r > 0.35) return PALETTE[14];
   if (heightT > 0.78 && r > 0.55) return PALETTE[8];
-  if (xn < 0.42 && heightT > 0.35 && r > 0.42) return PALETTE[3];
-  if (xn > 0.55 && heightT < 0.55 && r > 0.5) return PALETTE[6];
+  if (xn < 0.42 && heightT > 0.35 && r > 0.42 - a.mid * 0.1) return PALETTE[3];
+  if (xn > 0.55 && heightT < 0.55 && r > 0.5 - a.bass * 0.08) return PALETTE[6];
   if (heightT > 0.55 && r > 0.48) return PALETTE[2];
-  if (heightT > 0.3 && r > 0.52) return PALETTE[1];
+  if (heightT > 0.3 && r > 0.52) return PALETTE[a.treble > 0.55 ? 11 : 1];
   if (r > 0.58) return PALETTE[9];
   if (r > 0.62) return PALETTE[7];
   return PALETTE[Math.floor(r * 5) + 1];
 }
 
-export function stippleVisible(x, y, frame) {
+export function stippleVisible(x, y, frame, a) {
   const base = hash(x * 1.7, y * 2.3, 0);
-  const flicker = hash(x, y, frame * 1.13 + 17);
-  const threshold = 0.905 + 0.018 * Math.sin(frame * 0.4 + x * 0.02);
-  return flicker > threshold && base > 0.08;
+  const flicker = hash(x, y, frame * 1.13 + 17 + a.treble * 3);
+  // denser on bass, more sparkle on treble/beat
+  const threshold = 0.905 - a.bass * 0.04 - a.beat * 0.05
+    + 0.018 * Math.sin(frame * 0.4 + x * 0.02)
+    - a.treble * 0.03;
+  return flicker > threshold && base > 0.08 - a.rms * 0.04;
 }
 
-export function renderFrame(w, h, frame) {
+export function renderFrame(w, h, frame, audio = null) {
+  const a = audio || { bass: 0.12, mid: 0.1, treble: 0.1, beat: 0, rms: 0.1 };
   const data = new Uint8ClampedArray(w * h * 4);
   for (let y = 0; y < h; y++) {
     for (let x = 0; x < w; x++) {
       const i = (y * w + x) * 4;
-      if (!inMountain(x, y, w, h) || !stippleVisible(x, y, frame)) {
+      if (!inMountain(x, y, w, h, a) || !stippleVisible(x, y, frame, a)) {
         data[i] = BG[0];
         data[i + 1] = BG[1];
         data[i + 2] = BG[2];
         data[i + 3] = 255;
         continue;
       }
-      const [r, g, b] = pickColor(x, y, w, h, frame);
+      const [r, g, b] = pickColor(x, y, w, h, frame, a);
       data[i] = r;
       data[i + 1] = g;
       data[i + 2] = b;

@@ -452,7 +452,9 @@ export class ArtemisSim {
   tick(now) {
     if (!this.raf) return;
     if (!this.paused) {
-      this.simTime = (now - this.t0) * 0.001;
+      const scale = this.timeScale || 1;
+      this.simTime = (now - this.t0) * 0.001 * scale;
+      // keep t0 consistent when scale changes via rebase in setTimeScale
       this.draw();
     }
     this.raf = requestAnimationFrame((n) => this.tick(n));
@@ -460,13 +462,25 @@ export class ArtemisSim {
 
   start() {
     if (this.raf) return;
-    this.t0 = performance.now() - this.simTime * 1000;
+    this.timeScale = this.timeScale || 1;
+    this.t0 = performance.now() - (this.simTime * 1000) / (this.timeScale || 1);
     this.raf = requestAnimationFrame((n) => this.tick(n));
   }
 
   togglePause() {
     this.paused = !this.paused;
-    if (!this.paused) this.t0 = performance.now() - this.simTime * 1000;
+    if (!this.paused) {
+      const scale = this.timeScale || 1;
+      this.t0 = performance.now() - (this.simTime * 1000) / scale;
+    }
+  }
+
+  setTimeScale(s) {
+    const scale = Math.max(0.15, Math.min(4, Number(s) || 1));
+    const now = performance.now();
+    // rebase so simTime continuous
+    this.t0 = now - (this.simTime * 1000) / scale;
+    this.timeScale = scale;
   }
 
   skipMission() {
@@ -474,7 +488,77 @@ export class ArtemisSim {
     let acc = 0;
     for (let i = 0; i <= st.missionIdx; i++) acc += MISSIONS[i].simSec;
     this.simTime = acc;
-    this.t0 = performance.now() - this.simTime * 1000;
+    const scale = this.timeScale || 1;
+    this.t0 = performance.now() - (this.simTime * 1000) / scale;
+    this.missionFlash = 1;
+  }
+
+  prevMission() {
+    const st = programAt(this.simTime);
+    if (st.missionIdx <= 0) {
+      this.simTime = 0;
+    } else {
+      let acc = 0;
+      for (let i = 0; i < st.missionIdx; i++) acc += MISSIONS[i].simSec;
+      this.simTime = Math.max(0, acc - 0.05);
+    }
+    const scale = this.timeScale || 1;
+    this.t0 = performance.now() - (this.simTime * 1000) / scale;
+    this.missionFlash = 1;
+  }
+
+  jumpMission(idx) {
+    const i = ((idx % MISSIONS.length) + MISSIONS.length) % MISSIONS.length;
+    let acc = 0;
+    for (let k = 0; k < i; k++) acc += MISSIONS[k].simSec;
+    this.simTime = acc;
+    const scale = this.timeScale || 1;
+    this.t0 = performance.now() - (this.simTime * 1000) / scale;
+    this.missionFlash = 1;
+  }
+
+  status() {
+    const st = programAt(this.simTime);
+    const tel = telemetry(st.mission, st.local, st.phase);
+    const k = st.phase.key;
+    // abgeleitete Schiffssysteme (dynamisch nach Phase)
+    const burn = ['ascent', 'separation', 'ascent_hls', 'reentry', 'descent'].includes(k);
+    const space = ['orbit', 'transit', 'lunar', 'docking', 'eva', 'return', 'transfer'].includes(k);
+    const tank = Math.max(0.05, Math.min(1,
+      burn ? 0.95 - (st.local % 1) * 0.55
+        : space ? 0.55 + 0.2 * Math.sin(this.simTime * 0.3)
+        : 0.88 + 0.05 * Math.sin(this.simTime)
+    ));
+    const temp = burn
+      ? 40 + tel.velKms * 28 + (k === 'reentry' ? 400 : 80)
+      : space ? -40 + 15 * Math.sin(this.simTime * 0.2)
+      : 22 + 3 * Math.sin(this.simTime * 0.5);
+    const o2 = Math.max(0.2, 0.92 - (st.mission.crew > 0 ? st.local * 0.08 : 0.02) + 0.03 * Math.sin(this.simTime));
+    const power = Math.max(0.25, Math.min(1,
+      k === 'pad' ? 0.7 : space ? 0.85 + 0.1 * Math.sin(this.simTime * 0.4) : burn ? 0.95 : 0.75
+    ));
+    const cabin = 101 + 2 * Math.sin(this.simTime * 0.7);
+    const gForce = burn ? Math.min(4.2, 1 + tel.velKms * 0.35) : (k === 'reentry' ? 3.5 : 1.0);
+    return {
+      paused: this.paused,
+      simTime: this.simTime,
+      timeScale: this.timeScale || 1,
+      missionIdx: st.missionIdx,
+      mission: st.mission.name,
+      phase: st.phase.label,
+      phaseKey: k,
+      total: MISSIONS.length,
+      altKm: tel.altKm,
+      velKms: tel.velKms,
+      metSec: tel.metSec,
+      tank,
+      temp,
+      o2,
+      power,
+      cabin,
+      gForce,
+      crew: st.mission.crew || 0,
+    };
   }
 
   saveFrame() {

@@ -108358,6 +108358,56 @@ function gridsMulti(rows, cols, selectedGrid = $fx.getParam("pattern_id")) {
   return { explicitGrid: grid };
 }
 
+
+window.__LIITH__ = {
+  tempo: 30,
+  rotate: 20,
+  pixel: 1,
+  hueShift: 0,
+  follow: 0.14,
+  infinite: true,
+  gen: 0,
+  mesh: null,
+  controls: null,
+  material: null,
+  rebuilding: false,
+  applyLive() {
+    if (this.controls) this.controls.autoRotateSpeed = this.rotate;
+    if (this.mesh) {
+      const s = this.pixel;
+      this.mesh.scale.set(s, s, s);
+    }
+    if (this.material && this.material.uniforms && this._baseStart && this._baseEnd) {
+      const c0 = this._baseStart.clone();
+      const c1 = this._baseEnd.clone();
+      const shift = this.hueShift || 0;
+      if (shift) {
+        const hsl0 = {}; c0.getHSL(hsl0); c0.setHSL((hsl0.h + shift) % 1, hsl0.s, hsl0.l);
+        const hsl1 = {}; c1.getHSL(hsl1); c1.setHSL((hsl1.h + shift) % 1, hsl1.s, hsl1.l);
+      }
+      this.material.uniforms.lineColorStart.value.copy(c0);
+      this.material.uniforms.lineColorEnd.value.copy(c1);
+    }
+  },
+  setPaletteColors(start, end) {
+    this._baseStart = start.clone ? start.clone() : start;
+    this._baseEnd = end.clone ? end.clone() : end;
+    this.applyLive();
+  },
+  status() {
+    return {
+      tempo: this.tempo,
+      rotate: this.rotate,
+      pixel: this.pixel,
+      hueShift: this.hueShift,
+      follow: this.follow,
+      infinite: !!this.infinite,
+      gen: this.gen || 0,
+      params: (typeof $fx !== 'undefined' && $fx.getRawParams) ? $fx.getRawParams() : null,
+    };
+  },
+};
+
 $fx.params([
   {
     id: "pattern_id",
@@ -108444,7 +108494,7 @@ const rows1 = $fx.getParam("rows_id");
 const cols1 = $fx.getParam("cols_id");
 const generations = $fx.getParam("generations_id");
 const selectedColorKey = $fx.getParam("color_id");
-const { colorStart, colorEnd } = colorKeys[selectedColorKey];
+let { colorStart, colorEnd } = colorKeys[selectedColorKey];
 
 const selectedGrid = $fx.getParam("pattern_id");
 const { explicitGrid } = gridsMulti(rows1, cols1, selectedGrid);
@@ -108454,7 +108504,9 @@ function init() {
   camera = new PerspectiveCamera(55, 1, 10, 7000);
   camera.position.set(54, 35, -54);
   renderer = new WebGLRenderer();
-  renderer.setSize(window.innerHeight, window.innerHeight);
+  renderer.setSize(window.innerWidth || window.innerHeight, window.innerHeight, false);
+  camera.aspect = (window.innerWidth || window.innerHeight) / window.innerHeight;
+  camera.updateProjectionMatrix();
 
   document.body.appendChild(renderer.domElement);
 
@@ -108469,7 +108521,24 @@ function init() {
   controls.minDistance = 50;
   controls.maxDistance = 400;
   controls.autoRotate = true;
-  controls.autoRotateSpeed = 20.0;
+  controls.autoRotateSpeed = (window.__LIITH__ && window.__LIITH__.rotate) || 20.0;
+  if (window.__LIITH__) {
+    window.__LIITH__.controls = controls;
+    window.__LIITH__.camera = camera;
+    window.__LIITH__.renderer = renderer;
+    window.__LIITH__.scene = scene;
+  }
+  // Portrait/Kiosk: volle Fläche, niedriger Pixelratio
+  try {
+    const w = Math.max(320, window.innerWidth || 1080);
+    const h = Math.max(320, window.innerHeight || 1920);
+    renderer.setPixelRatio(1);
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    renderer.domElement.style.width = w + "px";
+    renderer.domElement.style.height = h + "px";
+  } catch (e) {}
 
   genererAutomateCellulaire(explicitGrid, generations, "shape2");
 
@@ -108544,36 +108613,27 @@ function addBlackCube() {
 }
 
 function genererAutomateCellulaire(explicitGrid, generations, geometryType) {
-  const ca = [explicitGrid];
-  let realGenerations = 0;
+  // Unendliches Wachstum: Ringpuffer sichtbarer Schichten + Kamera folgt nach oben
+  window.__LIITH_GROW_ID__ = (window.__LIITH_GROW_ID__ || 0) + 1;
+  const growId = window.__LIITH_GROW_ID__;
 
-  for (let gen = 1; gen < generations; gen++) {
-    const nextGen = calculateNextGeneration(ca[gen - 1], rule);
-    ca.push(nextGen);
+  const WINDOW = Math.max(24, Math.min(48, generations || 40));
+  const rows = explicitGrid.length;
+  const cols = explicitGrid[0].length;
+  const cellsPerLayer = rows * cols;
 
-    if (nextGen.some((row) => row.some((cell) => cell === 1))) {
-      realGenerations++;
-    }
-  }
+  let currentGen = explicitGrid.map((row) => row.slice());
+  let generationIndex = 0;
+  let writeSlot = 0;
 
-  $fx.features({
-    name: featureNom,
-    pattern: $fx.getParam("pattern_id"),
-    palette: $fx.getParam("color_id"),
-    size: $fx.getParam("rows_id") + "x" + $fx.getParam("cols_id"),
-    generations_max: $fx.getParam("generations_id"),
-    generations_achieved: realGenerations,
-  });
-
-  let currentGenerationIndex = 0;
-  const delay = 30;
   const matrix = new Matrix4();
   const lengthExtrusA = 1;
   const widthExtrusA = 1;
   const highExtrusA = 0.65;
+  const delay = () => (window.__LIITH__ && window.__LIITH__.tempo) || 30;
 
-  const offsetX = ((explicitGrid.length - 1) * lengthExtrusA) / 2;
-  const offsetZ = ((explicitGrid[0].length - 1) * widthExtrusA) / 2;
+  const offsetX = ((rows - 1) * lengthExtrusA) / 2;
+  const offsetZ = ((cols - 1) * widthExtrusA) / 2;
 
   let geometry;
   if (geometryType === "shape2") {
@@ -108608,55 +108668,190 @@ function genererAutomateCellulaire(explicitGrid, generations, geometryType) {
     side: DoubleSide,
   });
 
-  const maxInstances =
-    explicitGrid.length * explicitGrid[0].length * generations;
-  const instancedMesh = new InstancedMesh(
-    geometry,
-    material,
-    maxInstances
-  );
+  const maxInstances = cellsPerLayer * WINDOW;
+  const instancedMesh = new InstancedMesh(geometry, material, maxInstances);
+  // alle Instanzen unsichtbar vorbereiten
+  matrix.makeScale(0, 0, 0);
+  for (let i = 0; i < maxInstances; i++) {
+    instancedMesh.setMatrixAt(i, matrix);
+  }
+  instancedMesh.instanceMatrix.needsUpdate = true;
   scene.add(instancedMesh);
+
+  if (window.__LIITH__) {
+    window.__LIITH__.mesh = instancedMesh;
+    window.__LIITH__.material = material;
+    window.__LIITH__.infinite = true;
+    window.__LIITH__.gen = 0;
+    window.__LIITH__.setPaletteColors(
+      material.uniforms.lineColorStart.value,
+      material.uniforms.lineColorEnd.value
+    );
+    window.__LIITH__.applyLive();
+  }
+
+  // Kamera-Basisabstand zur Spitze merken
+  const camFollow = {
+    baseCamY: camera ? camera.position.y : 35,
+    baseTargetY: controls ? controls.target.y : 27,
+    offsetY: camera && controls ? camera.position.y - controls.target.y : 8,
+  };
+
+  function reviveIfDead(grid) {
+    const alive = grid.some((row) => row.some((cell) => cell === 1));
+    if (alive) return grid;
+    const g = grid.map((row) => row.slice());
+    const cx = Math.floor(rows / 2);
+    const cz = Math.floor(cols / 2);
+    // kleiner Impuls, damit es weiterwächst
+    for (let i = -1; i <= 1; i++) {
+      for (let j = -1; j <= 1; j++) {
+        const x = cx + i;
+        const z = cz + j;
+        if (x >= 0 && x < rows && z >= 0 && z < cols) g[x][z] = 1;
+      }
+    }
+    return g;
+  }
+
+  function sampleBlobField(nx, nz) {
+    const field = window.__LIITH_BLOB_FIELD__;
+    if (!field || !field.data || !field.n) return 0;
+    const n = field.n;
+    // Feld: data[imageY * n + imageX]; Grid-x←(1-imageY), Grid-z←imageX
+    const ix = Math.max(0, Math.min(n - 1.001, nz * (n - 1)));
+    const iy = Math.max(0, Math.min(n - 1.001, (1 - nx) * (n - 1)));
+    const x0 = Math.floor(ix);
+    const y0 = Math.floor(iy);
+    const x1 = Math.min(n - 1, x0 + 1);
+    const y1 = Math.min(n - 1, y0 + 1);
+    const tx = ix - x0;
+    const ty = iy - y0;
+    const d = field.data;
+    const a = d[y0 * n + x0] * (1 - tx) * (1 - ty);
+    const b = d[y0 * n + x1] * tx * (1 - ty);
+    const c = d[y1 * n + x0] * (1 - tx) * ty;
+    const e = d[y1 * n + x1] * tx * ty;
+    return a + b + c + e;
+  }
+
+  function injectBlobs(grid) {
+    const field = window.__LIITH_BLOB_FIELD__;
+    const blobs = window.__LIITH_BLOBS__;
+    const g = grid.map((row) => row.slice());
+    // Feld → Pixel: Blobs schreiben aktiv die Zellen
+    if (field && field.data && field.n) {
+      for (let x = 0; x < rows; x++) {
+        for (let z = 0; z < cols; z++) {
+          const v = sampleBlobField(x / Math.max(1, rows - 1), z / Math.max(1, cols - 1));
+          if (v > 0.28) g[x][z] = 1;
+          else if (v < 0.08 && Math.random() < 0.15) g[x][z] = 0; // leichte Ausdünnung außerhalb
+        }
+      }
+    }
+    if (blobs && blobs.length) {
+      for (const b of blobs) {
+        const x = Math.max(0, Math.min(rows - 1, Math.floor((1 - b.y) * rows)));
+        const z = Math.max(0, Math.min(cols - 1, Math.floor(b.x * cols)));
+        const r = Math.max(1, Math.min(5, Math.round((b.s || 0.05) * 14)));
+        for (let i = -r; i <= r; i++) {
+          for (let j = -r; j <= r; j++) {
+            if (i * i + j * j > r * r) continue;
+            const xx = x + i;
+            const zz = z + j;
+            if (xx >= 0 && xx < rows && zz >= 0 && zz < cols) g[xx][zz] = 1;
+          }
+        }
+      }
+    }
+    return g;
+  }
+
+  function placeLayer(generation, slot, worldY) {
+    let instanceId = slot * cellsPerLayer;
+    generation.forEach((row, x) => {
+      row.forEach((cell, z) => {
+        const positionX = x * lengthExtrusA - offsetX;
+        const positionZ = z * widthExtrusA - offsetZ;
+        const boost = sampleBlobField(
+          x / Math.max(1, rows - 1),
+          z / Math.max(1, cols - 1)
+        );
+        const on = cell === 1 || boost > 0.35;
+        if (on) {
+          const s = 0.55 + boost * 1.65;
+          const yLift = boost * 0.55;
+          matrix.makeTranslation(positionX, worldY + yLift, positionZ);
+          matrix.elements[0] *= s;
+          matrix.elements[5] *= s;
+          matrix.elements[10] *= s;
+          instancedMesh.setMatrixAt(instanceId++, matrix);
+        } else {
+          matrix.makeScale(0, 0, 0);
+          instancedMesh.setMatrixAt(instanceId++, matrix);
+        }
+      });
+    });
+    instancedMesh.instanceMatrix.needsUpdate = true;
+  }
+
+
+  function followCamera(topY) {
+    if (!controls || !camera) return;
+    const follow = (window.__LIITH__ && window.__LIITH__.follow) != null
+      ? window.__LIITH__.follow
+      : 0.18;
+    // Im Ringpuffer bleiben — nicht ins Unendliche davonfliegen
+    const desiredTargetY = Math.min(
+      WINDOW * highExtrusA * 0.72,
+      Math.max(camFollow.baseTargetY, topY - 6)
+    );
+    controls.target.y += (desiredTargetY - controls.target.y) * follow;
+    controls.target.x = 0;
+    controls.target.z = 0;
+    // Orbit-Limits lockern, damit Follow funktioniert
+    controls.maxDistance = 800;
+    controls.minDistance = 40;
+    const desiredCamY = controls.target.y + camFollow.offsetY;
+    camera.position.y += (desiredCamY - camera.position.y) * follow;
+    // leichte Aufwärts-Illusion: Kamera etwas mitschieben
+    controls.update();
+  }
 
   let lastTime = 0;
 
   function renderNextGeneration(time) {
-    if (time - lastTime >= delay) {
-      if (currentGenerationIndex < generations) {
-        const generation = ca[currentGenerationIndex];
+    if (growId !== window.__LIITH_GROW_ID__) return; // abgebrochen durch Rebuild
 
-        let instanceId =
-          currentGenerationIndex * explicitGrid.length * explicitGrid[0].length;
+    if (time - lastTime >= delay()) {
+      // Y im sichtbaren Ring (nicht generationIndex*∞)
+      const worldY = writeSlot * highExtrusA;
+      placeLayer(currentGen, writeSlot, worldY);
+      const tipY = worldY;
+      followCamera(tipY);
 
-        generation.forEach((row, x) => {
-          row.forEach((cell, z) => {
-            const positionX = x * lengthExtrusA - offsetX;
-            const positionZ = z * widthExtrusA - offsetZ;
-            const positionY = currentGenerationIndex * highExtrusA;
+      if (window.__LIITH__) window.__LIITH__.gen = generationIndex;
 
-            if (cell === 1) {
-              matrix.makeTranslation(positionX, positionY, positionZ);
-              instancedMesh.setMatrixAt(instanceId++, matrix);
-              instancedMesh.instanceMatrix.needsUpdate = true;
-              instancedMesh.instanceMatrix.setUsage(StaticDrawUsage);
-            } else {
-              matrix.makeScale(0, 0, 0);
-              instancedMesh.setMatrixAt(instanceId++, matrix);
-              instancedMesh.instanceMatrix.needsUpdate = true;
-              instancedMesh.instanceMatrix.setUsage(StaticDrawUsage);
-            }
-          });
-        });
-
-        currentGenerationIndex++;
-        lastTime = time;
-      }
+      // nächste Generation berechnen (unendlich) + Kamera-Blobs als Impuls
+      let nextGen = calculateNextGeneration(
+        currentGen,
+        window.__LIITH_RULE__ || rule
+      );
+      nextGen = injectBlobs(nextGen);
+      nextGen = reviveIfDead(nextGen);
+      currentGen = nextGen;
+      generationIndex++;
+      writeSlot = (writeSlot + 1) % WINDOW;
+      lastTime = time;
     }
 
-    if (currentGenerationIndex < generations) {
-      requestAnimationFrame(renderNextGeneration);
-    }
+    requestAnimationFrame(renderNextGeneration);
   }
 
+  // erste Schicht sofort
+  placeLayer(currentGen, 0, 0);
+  writeSlot = 1;
+  generationIndex = 1;
   requestAnimationFrame(renderNextGeneration);
 }
 
@@ -108709,22 +108904,81 @@ function animate() {
 }
 
 window.addEventListener("resize", () => {
-  renderer.setSize(window.innerHeight, window.innerHeight);
-  camera.aspect = 1;
+  const w = window.innerWidth || window.innerHeight;
+  const h = window.innerHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
   camera.updateProjectionMatrix();
 });
 
 init();
 
-$fx.on("params:update", (_, newValues) => {
-  if (newValues.pattern_id) {
-    const { explicitGrid } = gridsMulti(rows1, cols1, newValues.pattern_id);
+window.__LIITH_REBUILD__ = function __liithRebuild() {
+  if (!window.__LIITH__ || window.__LIITH__.rebuilding) return;
+  window.__LIITH__.rebuilding = true;
+  try {
+    const p = $fx.getParam("pattern_id");
+    const r = $fx.getParam("rows_id");
+    const c = $fx.getParam("cols_id");
+    const g = $fx.getParam("generations_id");
+    const pal = $fx.getParam("color_id");
+    const ruleKey = $fx.getParam("rule_id");
+    const { colorStart: cs, colorEnd: ce } = colorKeys[pal] || colorKeys.Aurora;
+    // update closed-over color refs used by generator
+    colorStart = cs;
+    colorEnd = ce;
+    const { explicitGrid } = gridsMulti(r, c, p);
     scene.clear();
-    genererAutomateCellulaire(explicitGrid, generations, "shape2");
-    controls.update();
+    addBlackCube();
+    // swap active rule for next generation calc via global alias
+    window.__LIITH_RULE__ = rules[ruleKey] || rules.rule1;
+    genererAutomateCellulaire(explicitGrid, g, "shape2");
+    if (window.__LIITH__.controls) {
+      window.__LIITH__.controls.target.set(0, 27, 0);
+      if (camera) camera.position.set(54, 35, -54);
+      window.__LIITH__.controls.update();
+    }
     renderer.render(scene, camera);
+  } finally {
+    window.__LIITH__.rebuilding = false;
   }
+};
+
+$fx.on("params:update", () => {
+  window.__LIITH_REBUILD__();
 });
+
+window.__LIITH_CTRL__ = {
+  setTempo(v) { window.__LIITH__.tempo = Math.max(4, Math.min(200, Number(v)||30)); },
+  setRotate(v) { window.__LIITH__.rotate = Math.max(0, Math.min(80, Number(v)||20)); window.__LIITH__.applyLive(); },
+  setPixel(v) { window.__LIITH__.pixel = Math.max(0.35, Math.min(2.8, Number(v)||1)); window.__LIITH__.applyLive(); },
+  setHue(v) { window.__LIITH__.hueShift = ((Number(v)||0) % 1 + 1) % 1; window.__LIITH__.applyLive(); },
+  setFollow(v) { window.__LIITH__.follow = Math.max(0.02, Math.min(0.5, Number(v)||0.14)); },
+  homeCamera() {
+    const L = window.__LIITH__;
+    if (!L) return false;
+    if (L.controls) L.controls.target.set(0, 22, 0);
+    if (L.camera) L.camera.position.set(54, 40, -54);
+    if (L.controls) { L.controls.maxDistance = 800; L.controls.update(); }
+    return true;
+  },
+
+  setParams( partial ) {
+    return new Promise((resolve) => {
+      $fx._receiveUpdateParams(partial || {}, () => resolve(window.__LIITH__.status()));
+    });
+  },
+  rebuild() { window.__LIITH_REBUILD__ && window.__LIITH_REBUILD__(); return window.__LIITH__.status(); },
+  status() { return window.__LIITH__.status(); },
+  defs() {
+    return {
+      patterns: Object.keys(patterns),
+      rules: Object.keys(rules),
+      palettes: Object.keys(colorKeys),
+    };
+  },
+};
+
 
 /******/ })()
 ;

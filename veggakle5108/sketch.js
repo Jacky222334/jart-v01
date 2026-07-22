@@ -12,11 +12,16 @@ export class Veggakle34 {
     this.bufferCtx = this.buffer.getContext('2d');
     this.internalW = 640;
     this.internalH = 360;
+    this.audio = { bass: 0.12, mid: 0.1, treble: 0.1, beat: 0, rms: 0.1 };
 
     this.buffer.width = this.internalW;
     this.buffer.height = this.internalH;
     this.resize();
     window.addEventListener('resize', () => this.resize());
+  }
+
+  setAudio(levels) {
+    this.audio = levels;
   }
 
   resize() {
@@ -31,7 +36,7 @@ export class Veggakle34 {
   }
 
   draw() {
-    const data = renderFrame(this.internalW, this.internalH, this.frame);
+    const data = renderFrame(this.internalW, this.internalH, this.frame, this.audio);
     this.bufferCtx.putImageData(new ImageData(data, this.internalW, this.internalH), 0, 0);
 
     this.ctx.fillStyle = '#000';
@@ -53,8 +58,10 @@ export class Veggakle34 {
   tick(now) {
     if (!this.raf) return;
     if (!this.paused) {
-      if (now - this.lastTime >= 1000 / FPS) {
-        this.frame = (this.frame + 1) % FRAMES;
+      const fps = FPS + this.audio.bass * 20 + this.audio.beat * 30;
+      if (now - this.lastTime >= 1000 / fps) {
+        const step = 1 + (this.audio.beat > 0.5 ? 1 : 0);
+        this.frame = (this.frame + step) % FRAMES;
         this.lastTime = now;
         this.draw();
       }
