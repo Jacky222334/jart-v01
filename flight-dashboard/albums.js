@@ -43,8 +43,8 @@
       role: "RIGHT",
       photos: [
         { src: `${BASE}/cafe.jpg`, title: "食", cap: "Essen · gemeinsam" },
-        { src: `${BASE}/hotel.jpg`, title: "宿", cap: "City-Unterkunft aussen" },
-        { src: `${BASE}/room.jpg`, title: "部屋", cap: "Zimmer · angekommen" },
+        { src: `media/route/villa/exterior.png`, title: "宿", cap: "Villa 隅田川 · Eingang" },
+        { src: `media/route/villa/room-futon.png`, title: "部屋", cap: "Futon · angekommen" },
       ],
     },
   };
@@ -73,24 +73,24 @@
     },
     {
       agent: "YAN",
-      src: `${BASE}/hotel.jpg`,
+      src: `media/route/villa/exterior.png`,
       jp: "家族旅行",
       en: "Family trip",
-      line: "Tag 2: Check-in in der City-Unterkunft.",
+      line: "Tag 2: Check-in Villa 隅田川 · Kōtō.",
     },
     {
       agent: "TEAM",
-      src: `${BASE}/park.jpg`,
+      src: `media/route/villa/terrace.png`,
       jp: "東京の物語",
       en: "Tokyo story",
-      line: "ROTA · ANDŌ · YUSTO · YAN — gemeinsam unterwegs.",
+      line: "ROTA · ANDŌ · YUSTO · YAN — Terrasse am Fluss.",
     },
     {
       agent: "TEAM",
-      src: `${BASE}/room.jpg`,
+      src: `media/route/villa/room-4beds.png`,
       jp: "ただいま",
       en: "We're home",
-      line: "Zimmerlicht an. Die GPS-Spur endet hier – vorerst.",
+      line: "Vier Betten · Shoji-Licht · GPS endet hier – vorerst.",
     },
   ];
 
@@ -211,8 +211,29 @@
           <p class="team-sub">ROTA · ANDŌ · YUSTO · YAN — eine gemeinsame Story</p>
         </div>
         <div class="team-controls">
+          <button type="button" class="family-reel-chip" id="familyReelToggle" aria-expanded="false" title="Familienfilm · 43s">
+            <img src="anime-intro/family-films/clips/00-family-japan-film.jpg" alt="" width="36" height="64" loading="lazy" />
+            <span>短編</span>
+          </button>
           <button type="button" class="team-play" id="teamPlayBtn">▶ 開始 · Start</button>
           <button type="button" class="team-stop" id="teamStopBtn" disabled>■ 停止 · Stop</button>
+        </div>
+      </div>
+      <div class="family-reel" id="familyReel" hidden>
+        <div class="family-reel-stage">
+          <video
+            id="familyReelVideo"
+            poster="anime-intro/family-films/clips/00-family-japan-film.jpg"
+            playsinline
+            preload="none"
+            controls
+          ></video>
+        </div>
+        <div class="family-reel-meta">
+          <p class="family-reel-kicker">家族フィルム</p>
+          <p class="family-reel-title">Tempel → Bambus → Ramen → Fuji</p>
+          <p class="family-reel-note">10 Szenen · ~43s · stumm starten</p>
+          <button type="button" class="family-reel-close" id="familyReelClose">schließen</button>
         </div>
       </div>
       <div class="team-frames" id="teamFrames">
@@ -238,9 +259,39 @@
     const read = host.querySelector("#teamStoryRead");
     const playBtn = host.querySelector("#teamPlayBtn");
     const stopBtn = host.querySelector("#teamStopBtn");
+    const reel = host.querySelector("#familyReel");
+    const reelToggle = host.querySelector("#familyReelToggle");
+    const reelClose = host.querySelector("#familyReelClose");
+    const reelVideo = host.querySelector("#familyReelVideo");
+    const FILM_SRC = "anime-intro/family-films/videos/00-family-japan-film.mp4";
     let storyIdx = 0;
     let storyTimer = 0;
     let playing = false;
+
+    const closeReel = () => {
+      if (!reel || !reelToggle || !reelVideo) return;
+      reel.hidden = true;
+      reelToggle.setAttribute("aria-expanded", "false");
+      reelToggle.classList.remove("is-open");
+      reelVideo.pause();
+    };
+
+    const openReel = () => {
+      if (!reel || !reelToggle || !reelVideo) return;
+      stopStory();
+      reel.hidden = false;
+      reelToggle.setAttribute("aria-expanded", "true");
+      reelToggle.classList.add("is-open");
+      if (!reelVideo.src) reelVideo.src = FILM_SRC;
+      reelVideo.muted = true;
+      reelVideo.play().catch(() => {});
+    };
+
+    reelToggle?.addEventListener("click", () => {
+      if (reel?.hidden) openReel();
+      else closeReel();
+    });
+    reelClose?.addEventListener("click", closeReel);
 
     const showFrame = (i, { lightbox = false } = {}) => {
       const s = TEAM_STORY[i];

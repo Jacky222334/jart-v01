@@ -1,3 +1,4 @@
+# railway up nutzt diese Datei (nicht nur .dockerignore)
 .git
 .cursor
 .DS_Store
@@ -7,15 +8,22 @@
 .env.tapo
 node_modules
 agent-transcripts
-__pycache__
-*.pyc
+
+# venvs & caches
 .venv
 .venv-*
 **/.venv
 **/__pycache__
+__pycache__
+*.pyc
 
+# heavy / local-only
 norfair
 norfair-demo
+.venv-norfair
+.venv-tapo
+.venv-samsung
+.venv-launchpad
 esplane-imu
 nasa_api
 organic-neo
@@ -36,11 +44,25 @@ _chat.txt
 *.mp3
 *.pt
 *.zip
+
+# optional bulky demos
 uebersicht/thumbs
 flight-dashboard/media/uploads
 flight-dashboard/.venv
+
+# Anime: nur Thumbs + web-GIFs für Intro (volle Clips ~70 MB)
+flight-dashboard/anime-intro/clips/*.gif
+flight-dashboard/anime-intro/*.png
+flight-dashboard/anime-intro/_ref-*.png
+flight-dashboard/anime-intro/clip-*.png
+
+# Family films: nur Full-Film + Poster (Stills/Refs/Einzelclips zu groß)
 flight-dashboard/anime-intro/family-films/*.png
 flight-dashboard/anime-intro/family-films/_sora_refs
 flight-dashboard/anime-intro/family-films/clips/*.gif
 flight-dashboard/anime-intro/family-films/videos/0[1-9]-*.mp4
 flight-dashboard/anime-intro/family-films/videos/10-*.mp4
+
+andrin-cn-gifs
+Private.Test.Space.2
+.env.openai

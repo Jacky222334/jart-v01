@@ -17,6 +17,7 @@
   },
   "private": true,
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1094.0",
     "three": "^0.185.1"
   }
 }

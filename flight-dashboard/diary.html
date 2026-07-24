@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Agenten-Tagebuch · iPhone</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg0: #07110e;
+      --bg1: #12201b;
+      --ink: #e8f2ec;
+      --muted: #8aa198;
+      --ok: #3dcf7a;
+      --line: rgba(180, 230, 210, 0.22);
+      --accent: #5ee0c8;
+      --warn: #ffb040;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background:
+        radial-gradient(700px 420px at 15% -8%, #1a3a35 0%, transparent 55%),
+        radial-gradient(500px 320px at 100% 10%, #2a2210 0%, transparent 50%),
+        linear-gradient(165deg, #0c1418, #15241f);
+      color: var(--ink);
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    main {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: max(1rem, env(safe-area-inset-top)) 1rem calc(2rem + env(safe-area-inset-bottom));
+    }
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 0.75rem;
+      margin-bottom: 0.85rem;
+    }
+    h1 {
+      margin: 0;
+      font-size: 1.15rem;
+      letter-spacing: 0.04em;
+    }
+    .top a {
+      color: var(--accent);
+      font-size: 0.72rem;
+      text-decoration: none;
+      letter-spacing: 0.04em;
+    }
+    .lead {
+      margin: 0 0 1rem;
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.45;
+    }
+    .agents {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.45rem;
+      margin-bottom: 1rem;
+    }
+    .agents button {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: rgba(8, 16, 14, 0.75);
+      color: var(--ink);
+      font: inherit;
+      padding: 0.7rem 0.55rem;
+      cursor: pointer;
+      text-align: left;
+    }
+    .agents button b {
+      display: block;
+      font-size: 0.95rem;
+      letter-spacing: 0.04em;
+    }
+    .agents button span {
+      display: block;
+      margin-top: 0.15rem;
+      font-size: 0.68rem;
+      color: var(--muted);
+    }
+    .agents button.is-on {
+      border-color: rgba(94, 224, 200, 0.65);
+      background: rgba(94, 224, 200, 0.12);
+      box-shadow: 0 0 0 1px rgba(94, 224, 200, 0.25);
+    }
+    label {
+      display: grid;
+      gap: 0.28rem;
+      margin-bottom: 0.75rem;
+      font-size: 0.68rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    input, textarea {
+      width: 100%;
+      font: inherit;
+      font-size: 1rem;
+      color: var(--ink);
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--line);
+      padding: 0.7rem 0.75rem;
+      border-radius: 0;
+    }
+    textarea {
+      min-height: 9rem;
+      resize: vertical;
+      line-height: 1.45;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+    .meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.55rem;
+    }
+    .geo-row {
+      display: flex;
+      gap: 0.45rem;
+      align-items: stretch;
+    }
+    .geo-row input { flex: 1; }
+    .geo-row button {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: rgba(8, 16, 14, 0.85);
+      color: var(--accent);
+      font: inherit;
+      font-size: 0.68rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 0 0.85rem;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .coords {
+      margin: -0.35rem 0 0.85rem;
+      font-size: 0.68rem;
+      color: var(--muted);
+      min-height: 1rem;
+    }
+    .actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.35rem;
+    }
+    .actions button {
+      appearance: none;
+      flex: 1;
+      border: 1px solid var(--line);
+      background: rgba(8, 16, 14, 0.85);
+      color: var(--ink);
+      font: inherit;
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.9rem 0.75rem;
+      cursor: pointer;
+    }
+    .actions .primary {
+      border-color: rgba(61, 207, 122, 0.55);
+      background: rgba(61, 207, 122, 0.14);
+      color: var(--ok);
+    }
+    .actions button:disabled { opacity: 0.45; cursor: default; }
+    #status {
+      margin-top: 0.85rem;
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.4;
+      min-height: 1.2rem;
+    }
+    #status.ok { color: var(--ok); }
+    #status.err { color: #ff7a7a; }
+    .feed {
+      margin-top: 1.5rem;
+      border-top: 1px solid var(--line);
+      padding-top: 1rem;
+    }
+    .feed h2 {
+      margin: 0 0 0.65rem;
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--warn);
+    }
+    .entry {
+      border: 1px solid var(--line);
+      background: rgba(4, 10, 12, 0.55);
+      padding: 0.65rem 0.7rem;
+      margin-bottom: 0.5rem;
+    }
+    .entry time {
+      display: block;
+      font-size: 0.65rem;
+      color: var(--muted);
+      margin-bottom: 0.2rem;
+    }
+    .entry .place {
+      font-size: 0.68rem;
+      color: var(--accent);
+      margin-bottom: 0.35rem;
+    }
+    .entry strong {
+      display: block;
+      font-size: 0.85rem;
+      margin-bottom: 0.25rem;
+    }
+    .entry p {
+      margin: 0;
+      font-size: 0.82rem;
+      line-height: 1.4;
+      white-space: pre-wrap;
+    }
+    .empty {
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="top">
+      <h1>日誌 · Tagebuch</h1>
+      <a href="index.html">← Dashboard</a>
+    </div>
+    <p class="lead">Mit dem iPhone schreiben — Datum und Ort werden mitgesendet. Wähle deinen Agenten.</p>
+
+    <div class="agents" id="agents" role="group" aria-label="Agent wählen"></div>
+
+    <form id="form">
+      <div class="meta-grid">
+        <label>
+          Datum
+          <input type="date" id="date" required />
+        </label>
+        <label>
+          Titel (optional)
+          <input type="text" id="title" maxlength="120" placeholder="Kurzer Titel" autocomplete="off" />
+        </label>
+      </div>
+
+      <label>
+        Ort
+        <div class="geo-row">
+          <input type="text" id="place" maxlength="160" placeholder="Ort wird per GPS gesetzt…" autocomplete="off" />
+          <button type="button" id="geoBtn">GPS</button>
+        </div>
+      </label>
+      <p class="coords" id="coords">GPS: noch nicht gesetzt</p>
+
+      <label>
+        Eintrag
+        <textarea id="body" maxlength="4000" required placeholder="Was passiert gerade?"></textarea>
+      </label>
+
+      <div class="actions">
+        <button type="submit" class="primary" id="saveBtn">Senden</button>
+        <button type="button" id="refreshBtn">Aktualisieren</button>
+      </div>
+    </form>
+
+    <p id="status"></p>
+
+    <section class="feed" aria-live="polite">
+      <h2 id="feedTitle">Deine Einträge</h2>
+      <div id="feed"></div>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      const AGENTS = [
+        { id: "ROTA", person: "Lotta", kana: "ロタ" },
+        { id: "ANDŌ", person: "Andrin", kana: "アンドー" },
+        { id: "YUSTO", person: "Justus", kana: "ユスト" },
+        { id: "YAN", person: "Jan", kana: "ヤン" },
+      ];
+
+      const qs = new URLSearchParams(location.search);
+      let agent = (qs.get("agent") || localStorage.getItem("jartDiaryAgent") || "ROTA").toUpperCase();
+      if (agent === "ANDO") agent = "ANDŌ";
+      if (!AGENTS.some((a) => a.id === agent)) agent = "ROTA";
+
+      let geo = { lat: null, lon: null, acc_m: null };
+
+      const agentsEl = document.getElementById("agents");
+      const dateEl = document.getElementById("date");
+      const titleEl = document.getElementById("title");
+      const placeEl = document.getElementById("place");
+      const bodyEl = document.getElementById("body");
+      const coordsEl = document.getElementById("coords");
+      const statusEl = document.getElementById("status");
+      const feedEl = document.getElementById("feed");
+      const feedTitle = document.getElementById("feedTitle");
+      const saveBtn = document.getElementById("saveBtn");
+
+      function todayLocal() {
+        const d = new Date();
+        const off = d.getTimezoneOffset();
+        const local = new Date(d.getTime() - off * 60000);
+        return local.toISOString().slice(0, 10);
+      }
+
+      dateEl.value = todayLocal();
+
+      function setStatus(msg, kind) {
+        statusEl.textContent = msg || "";
+        statusEl.className = kind || "";
+      }
+
+      function renderAgents() {
+        agentsEl.innerHTML = AGENTS.map(
+          (a) => `
+          <button type="button" data-agent="${a.id}" class="${a.id === agent ? "is-on" : ""}">
+            <b>${a.id}</b>
+            <span>${a.kana} · ${a.person}</span>
+          </button>`
+        ).join("");
+        agentsEl.querySelectorAll("button").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            agent = btn.dataset.agent;
+            localStorage.setItem("jartDiaryAgent", agent);
+            history.replaceState(null, "", `?agent=${encodeURIComponent(agent)}`);
+            renderAgents();
+            loadFeed();
+          });
+        });
+      }
+
+      function paintCoords() {
+        if (geo.lat == null || geo.lon == null) {
+          coordsEl.textContent = "GPS: noch nicht gesetzt";
+          return;
+        }
+        const acc = geo.acc_m != null ? ` · ±${Math.round(geo.acc_m)} m` : "";
+        coordsEl.textContent = `GPS: ${geo.lat.toFixed(5)}, ${geo.lon.toFixed(5)}${acc}`;
+      }
+
+      async function reversePlace(lat, lon) {
+        try {
+          const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&zoom=16&accept-language=de`;
+          const res = await fetch(url, {
+            headers: { Accept: "application/json" },
+          });
+          if (!res.ok) return null;
+          const data = await res.json();
+          const a = data.address || {};
+          const parts = [
+            a.neighbourhood || a.suburb || a.quarter,
+            a.city || a.town || a.village || a.municipality,
+            a.country,
+          ].filter(Boolean);
+          return parts.slice(0, 2).join(", ") || data.display_name || null;
+        } catch {
+          return null;
+        }
+      }
+
+      function locate(force) {
+        if (!navigator.geolocation) {
+          setStatus("GPS nicht verfügbar auf diesem Gerät", "err");
+          return;
+        }
+        setStatus("GPS wird ermittelt…");
+        navigator.geolocation.getCurrentPosition(
+          async (pos) => {
+            geo = {
+              lat: pos.coords.latitude,
+              lon: pos.coords.longitude,
+              acc_m: pos.coords.accuracy,
+            };
+            paintCoords();
+            if (force || !placeEl.value.trim()) {
+              const name = await reversePlace(geo.lat, geo.lon);
+              if (name) placeEl.value = name;
+              else placeEl.value = `${geo.lat.toFixed(4)}, ${geo.lon.toFixed(4)}`;
+            }
+            setStatus("Ort gesetzt", "ok");
+          },
+          (err) => {
+            setStatus(`GPS: ${err.message || "fehlgeschlagen"}`, "err");
+          },
+          { enableHighAccuracy: true, timeout: 12000, maximumAge: 15000 }
+        );
+      }
+
+      function escapeHtml(s) {
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function fmtLong(iso) {
+        const [y, m, d] = String(iso).split("-");
+        return `${d}.${m}.${y}`;
+      }
+
+      async function loadFeed() {
+        feedTitle.textContent = `Einträge · ${agent}`;
+        feedEl.innerHTML = `<p class="empty">Lade…</p>`;
+        try {
+          const res = await fetch(`/api/diary?agent=${encodeURIComponent(agent)}&limit=40`, {
+            cache: "no-store",
+          });
+          const data = await res.json();
+          const list = (data.entries || []).filter((e) => e.agent === agent);
+          if (!list.length) {
+            feedEl.innerHTML = `<p class="empty">Noch keine Einträge — schreib den ersten.</p>`;
+            return;
+          }
+          feedEl.innerHTML = list
+            .map(
+              (e) => `
+            <article class="entry">
+              <time datetime="${escapeHtml(e.date)}">${fmtLong(e.date)}${e.created_at ? " · " + new Date(e.created_at).toLocaleTimeString("de-CH", { hour: "2-digit", minute: "2-digit" }) : ""}</time>
+              ${e.place ? `<div class="place">📍 ${escapeHtml(e.place)}</div>` : ""}
+              <strong>${escapeHtml(e.title || "Eintrag")}</strong>
+              <p>${escapeHtml(e.body)}</p>
+            </article>`
+            )
+            .join("");
+        } catch (err) {
+          feedEl.innerHTML = `<p class="empty">Laden fehlgeschlagen</p>`;
+        }
+      }
+
+      document.getElementById("geoBtn").addEventListener("click", () => locate(true));
+      document.getElementById("refreshBtn").addEventListener("click", () => loadFeed());
+
+      document.getElementById("form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const body = bodyEl.value.trim();
+        if (!body) {
+          setStatus("Text fehlt", "err");
+          return;
+        }
+        saveBtn.disabled = true;
+        setStatus("Sende…");
+        try {
+          const res = await fetch("/api/diary", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              agent,
+              date: dateEl.value,
+              title: titleEl.value.trim(),
+              body,
+              place: placeEl.value.trim(),
+              lat: geo.lat,
+              lon: geo.lon,
+              acc_m: geo.acc_m,
+              source: "iphone",
+            }),
+          });
+          const data = await res.json();
+          if (!res.ok || !data.ok) throw new Error(data.error || "Speichern fehlgeschlagen");
+          bodyEl.value = "";
+          titleEl.value = "";
+          setStatus("Gespeichert", "ok");
+          await loadFeed();
+        } catch (err) {
+          setStatus(err.message || String(err), "err");
+        } finally {
+          saveBtn.disabled = false;
+        }
+      });
+
+      renderAgents();
+      paintCoords();
+      locate(false);
+      loadFeed();
+    })();
+  </script>
+</body>
+</html>

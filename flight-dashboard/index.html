@@ -36,6 +36,10 @@
     <!-- Immer laufende Globus-Animation -->
     <section class="panel globe-panel">
       <div id="globeWrap" class="globe-wrap">
+        <div class="globe-anime-sky" aria-hidden="true">
+          <div class="globe-anime-sky__gif"></div>
+          <div class="globe-anime-sky__stars"></div>
+        </div>
         <canvas id="globe"></canvas>
         <div class="globe-vignette"></div>
         <div class="globe-sweep" id="globeSweep"></div>
@@ -134,12 +138,30 @@
         </div>
         <audio id="liveAudio" preload="none"></audio>
       </section>
+
+      <section class="panel fc-panel" id="fcPanel" data-mode="offline" aria-label="Flightcontroller">
+        <div class="fc-head">
+          <h2>Flightcontroller</h2>
+          <span class="status"><span class="dot off" id="fcDot"></span><span id="fcMsg">FC…</span></span>
+        </div>
+        <div class="fc-grid">
+          <div><label>Roll</label><strong id="fcRoll">—</strong></div>
+          <div><label>Pitch</label><strong id="fcPitch">—</strong></div>
+          <div><label>Yaw</label><strong id="fcYaw">—</strong></div>
+          <div><label>Thrust</label><strong id="fcThrust">—</strong></div>
+          <div><label>Vbat</label><strong id="fcVbat">—</strong></div>
+          <div><label>Armed</label><strong id="fcArmed" data-on="0">—</strong></div>
+          <div><label>Gyro X</label><strong id="fcGx">—</strong></div>
+          <div><label>Gyro Y</label><strong id="fcGy">—</strong></div>
+          <div><label>Gyro Z</label><strong id="fcGz">—</strong></div>
+        </div>
+      </section>
     </aside>
 
     <section class="panel cams-panel">
       <div class="cams-head">
         <h2>Kameras · Agenten</h2>
-        <span class="cams-note">ROTA · ANDŌ · YUSTO · YAN · 写真</span>
+        <span class="cams-note">ROTA · ANDŌ · YUSTO Phone · YAN USB · <a href="diary.html" style="color:inherit">Tagebuch iPhone</a> · <a href="feedback.html" style="color:inherit">Feedback Board</a> · <a href="phone-send.html" style="color:inherit">iPhone senden</a> · <a href="phone-live.html" style="color:inherit">Phone Live</a> · <a href="cam-live.html" style="color:inherit">USB</a></span>
       </div>
       <div class="cam-grid" id="camGrid"></div>
     </section>
@@ -148,13 +170,49 @@
 
     <section class="panel expense-panel" id="expensePanel" aria-label="Ausgaben und Konto"></section>
 
+    <section class="panel feedback-panel" id="feedbackBoard" aria-label="Anonymes Feedback Board"></section>
+
+    <section class="panel stay-panel" id="stayRoute" aria-label="Villa Sumidagawa erste Infos"></section>
+
     <section class="panel route-panel" id="routeTimeline" aria-label="GPS Reiseverlauf"></section>
 
     <section class="panel team-panel" id="teamStory" aria-label="Team Story"></section>
+
+    <section class="panel tokyo-live-panel" id="tokyoLive" aria-label="Tokio Live Webcams">
+      <div class="tokyo-live-head">
+        <div>
+          <h2>Tokio Live</h2>
+          <p class="tokyo-live-sub">Öffentliche Webcams · Skip durch Live / Bilder / Filme</p>
+        </div>
+        <div class="tokyo-live-modes" role="tablist">
+          <button type="button" data-tl-mode="live" class="is-active">Live</button>
+          <button type="button" data-tl-mode="stills">Bilder</button>
+          <button type="button" data-tl-mode="films">Filme</button>
+          <button type="button" data-tl-mode="all">Alles</button>
+        </div>
+      </div>
+      <div class="tokyo-live-window">
+        <div class="tokyo-live-stage" data-tl-stage></div>
+        <div class="tokyo-live-chrome">
+          <div class="tokyo-live-meta">
+            <span class="tokyo-live-status" data-tl-status>LIVE</span>
+            <strong data-tl-title>—</strong>
+            <span data-tl-place></span>
+            <em data-tl-note></em>
+          </div>
+          <div class="tokyo-live-controls">
+            <button type="button" data-tl-skip="-1" aria-label="Zurück">◀</button>
+            <button type="button" class="tokyo-live-skip" data-tl-skip="1">Skip ▶</button>
+            <button type="button" data-tl-auto title="Auto-Skip">Auto</button>
+            <span class="tokyo-live-count" data-tl-count>0 / 0</span>
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
 
   <footer class="help">
-    <p>u-blox 7 · Globus · 4× Cam-SIM · Distanz Zürich &amp; Näfels/Mollis · DJI Mic Mini</p>
+    <p>u-blox 7 · Globus · 3× Cam-SIM + USB Live · Distanz Zürich &amp; Näfels/Mollis · DJI Mic Mini</p>
   </footer>
 
   <script src="intro.js"></script>
@@ -162,14 +220,19 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="map3d.js"></script>
   <script src="globe.js"></script>
+  <script src="tokyo-live.js"></script>
   <script src="cams.js"></script>
   <script src="diaries.js"></script>
+  <script src="antenna-morse.js"></script>
   <script src="albums.js"></script>
   <script src="upload.js"></script>
   <script src="expenses.js"></script>
+  <script src="feedback-board.js"></script>
+  <script src="stay-route.js"></script>
   <script src="route-timeline.js"></script>
   <script src="code-rain.js"></script>
   <script src="meet.js"></script>
+  <script src="fc.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-/* Horizontale GPS-Verlaufsansicht · simulierte Reise Zürich → Tokio → Unterkunft */
+/* Horizontale GPS-Verlaufsansicht · Zürich → Narita → Kiyosumi → Villa 隅田川 */
 (() => {
   const STOPS = [
     {
@@ -8,7 +8,7 @@
       jp: "チューリッヒ",
       lat: 47.3769,
       lon: 8.5417,
-      time: "Tag 1 · 08:40",
+      time: "Tag 1 · Abflug",
       note: "Start · GPS Fix stabil",
       img: "media/route/zurich.jpg",
       kind: "start",
@@ -21,32 +21,56 @@
       lat: 55.0,
       lon: 80.0,
       time: "Tag 1 · unterwegs",
-      note: "Simulierte Spur · CH → JP",
+      note: "Spur · CH → JP",
       img: null,
       kind: "flight",
     },
     {
       day: 1,
+      id: "nrt",
+      title: "Narita",
+      jp: "成田空港",
+      lat: 35.772,
+      lon: 140.3929,
+      time: "Tag 1 · Ankunft NRT",
+      note: "Keisei / Limousine → Kōtō",
+      img: "media/route/villa/narita-map.png",
+      kind: "city",
+    },
+    {
+      day: 1,
       id: "tyo",
-      title: "Tokio",
-      jp: "東京",
-      lat: 35.6762,
-      lon: 139.6503,
-      time: "Tag 1 · Ankunft",
-      note: "Landung · Stadtlichter",
-      img: "media/route/tokyo-arrive.jpg",
+      title: "Skytree-Sicht",
+      jp: "隅田川",
+      lat: 35.71,
+      lon: 139.81,
+      time: "Tag 1 · Stadt",
+      note: "Fluss · Nachtlichter",
+      img: "media/route/villa/skytree-night.png",
       kind: "city",
     },
     {
       day: 2,
+      id: "sta",
+      title: "Kiyosumi-shirakawa",
+      jp: "清澄白河",
+      lat: 35.6821,
+      lon: 139.7989,
+      time: "Tag 2 · Station",
+      note: "8 Min · 600 m zu Fuss",
+      img: "media/route/villa/walk-map.png",
+      kind: "stay",
+    },
+    {
+      day: 2,
       id: "stay",
-      title: "City-Unterkunft",
-      jp: "宿",
-      lat: 35.6895,
-      lon: 139.6917,
+      title: "Villa Sumidagawa",
+      jp: "Villa 隅田川",
+      lat: 35.6847,
+      lon: 139.7988,
       time: "Tag 2 · Check-in",
-      note: "Hotel / Wohnung · Ruhepunkt",
-      img: "media/route/stay.jpg",
+      note: "常盤1-5-1 · Kōtō · Basis",
+      img: "media/route/villa/exterior.png",
       kind: "stay",
     },
   ];
@@ -58,22 +82,31 @@
   function buildTrail() {
     const pts = [];
     const zh = STOPS[0];
-    const tyo = STOPS[2];
-    const stay = STOPS[3];
+    const nrt = STOPS[2];
+    const sta = STOPS[4];
+    const stay = STOPS[5];
     for (let i = 0; i <= 24; i++) {
       const t = i / 24;
-      // leichter Bogen nach Norden
-      const lat = lerp(zh.lat, tyo.lat, t) + Math.sin(Math.PI * t) * 12;
-      const lon = lerp(zh.lon, tyo.lon, t);
+      const lat = lerp(zh.lat, nrt.lat, t) + Math.sin(Math.PI * t) * 12;
+      const lon = lerp(zh.lon, nrt.lon, t);
       pts.push({ lat, lon, day: 1, phase: "flight" });
     }
-    for (let i = 1; i <= 8; i++) {
-      const t = i / 8;
+    for (let i = 1; i <= 10; i++) {
+      const t = i / 10;
       pts.push({
-        lat: lerp(tyo.lat, stay.lat, t) + (Math.random() - 0.5) * 0.002,
-        lon: lerp(tyo.lon, stay.lon, t) + (Math.random() - 0.5) * 0.002,
+        lat: lerp(nrt.lat, sta.lat, t),
+        lon: lerp(nrt.lon, sta.lon, t),
+        day: 1,
+        phase: "transit",
+      });
+    }
+    for (let i = 1; i <= 6; i++) {
+      const t = i / 6;
+      pts.push({
+        lat: lerp(sta.lat, stay.lat, t),
+        lon: lerp(sta.lon, stay.lon, t),
         day: 2,
-        phase: "city",
+        phase: "walk",
       });
     }
     return pts;
@@ -177,7 +210,7 @@
 
     ctx.fillStyle = "rgba(180, 210, 200, 0.55)";
     ctx.font = "10px IBM Plex Mono, monospace";
-    ctx.fillText("SIM GPS TRACK · Tag 1 Flug · Tag 2 Stadt", 10, 14);
+    ctx.fillText("GPS TRACK · NRT → 清澄白河 → Villa 隅田川", 10, 14);
   }
 
   function mount() {
@@ -191,12 +224,12 @@
       <div class="route-head">
         <div>
           <p class="route-kicker">経過 · GPS-Verlauf</p>
-          <h2>Reise-Route <em>Zürich → 東京 → 宿</em></h2>
-          <p class="route-sub">Simuliert · horizontale Spur wie bisherige GPS-Reise</p>
+          <h2>Reise-Route <em>Zürich → 成田 → Villa 隅田川</em></h2>
+          <p class="route-sub">Erste Infos · Spur bis Check-in Kōtō</p>
         </div>
         <div class="route-legend">
-          <span class="rl day1"><i></i> Tag 1 · Flug</span>
-          <span class="rl day2"><i></i> Tag 2 · Unterkunft</span>
+          <span class="rl day1"><i></i> Tag 1 · Flug / Transit</span>
+          <span class="rl day2"><i></i> Tag 2 · Station → Villa</span>
         </div>
       </div>
       <canvas id="routeTrack" class="route-track" height="120"></canvas>
@@ -250,7 +283,7 @@
           const jp = document.getElementById("lbJp");
           if (img) img.src = btn.dataset.src;
           if (title) title.textContent = btn.dataset.title || "";
-          if (cap) cap.textContent = "GPS-Verlauf · simulierte Reise";
+          if (cap) cap.textContent = "GPS-Verlauf · Route Villa 隅田川";
           if (jp) jp.textContent = btn.dataset.jp || "";
           box.hidden = false;
           document.body.classList.add("lb-open");

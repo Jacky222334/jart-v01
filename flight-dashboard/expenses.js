@@ -39,8 +39,8 @@
     },
     {
       jp: "宿",
-      title: "City-Unterkunft Anzahlung",
-      place: "新宿 · Hotel Check-in",
+      title: "Villa 隅田川 Anzahlung",
+      place: "江東区常盤 · Villa Sumidagawa",
       yen: 18500,
       cat: "stay",
       agent: "YAN",

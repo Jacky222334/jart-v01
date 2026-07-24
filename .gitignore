@@ -20,4 +20,12 @@ _chat.txt
 chat-harmonie/_chat.txt
 flight-dashboard/media/uploads/*
 !flight-dashboard/media/uploads/.gitkeep
+data/agent-diaries.json
+data/feedback-board.json
+!data/.gitkeep
 
+
+.env.openai
+.pi-ingest.token
+flight-dashboard/.env.relay
+.env.relay
